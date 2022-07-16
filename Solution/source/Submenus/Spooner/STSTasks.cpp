@@ -865,6 +865,7 @@ namespace sub::Spooner
 			this->speedMultiplier = -4.0f;
 			this->flag = AnimFlag::Loop;
 			this->lockPos = false;
+			this->durationToAnimDuration = false;
 		}
 		void PlayAnimation::RunP(GTAped& ep)
 		{

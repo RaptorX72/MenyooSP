@@ -665,8 +665,8 @@ namespace sub::Spooner
 				AddTickol("Lock Position", tskPtr->lockPos, bToggleLockPos, bToggleLockPos, TICKOL::BOXTICK, TICKOL::BOXBLANK); if (bToggleLockPos)
 					tskPtr->lockPos = !tskPtr->lockPos;
 
-				//bool bToggleDurationToAnimDuration = false;
-				//AddTickol("Task Duration To Anim Duration", tskPtr->durationToAnimDuration, bToggleDurationToAnimDuration, bToggleDurationToAnimDuration, TICKOL::BOXTICK, TICKOL::BOXBLANK); if (bToggleDurationToAnimDuration) tskPtr->durationToAnimDuration = !tskPtr->durationToAnimDuration;
+				bool bToggleDurationToAnimDuration = false;
+				AddTickol("Task Duration To Anim Duration", tskPtr->durationToAnimDuration, bToggleDurationToAnimDuration, bToggleDurationToAnimDuration, TICKOL::BOXTICK, TICKOL::BOXBLANK); if (bToggleDurationToAnimDuration) tskPtr->durationToAnimDuration = !tskPtr->durationToAnimDuration;
 
 			}
 			void PlayAnimation_allPedAnims()
