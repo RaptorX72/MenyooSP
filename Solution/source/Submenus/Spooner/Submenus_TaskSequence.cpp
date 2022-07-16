@@ -544,6 +544,7 @@ namespace sub::Spooner
 
 				AddOption("Settings", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_SETTINGS);
 				AddOption("All Animations", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_ALLPEDANIMS);
+				AddOption("Favorite Animations", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_FAVORITEANIMS);
 
 				if (!sub::AnimationSub_catind::vPresetPedAnims.empty())
 				{
@@ -769,6 +770,54 @@ namespace sub::Spooner
 				}
 
 				AddOption("Settings", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_SETTINGS);
+			}
+			void PlayAnimation_favoritePedAnims()
+			{
+				if (_selectedSTST == nullptr)
+				{
+					Menu::SetSub_previous();
+					return;
+				}
+				auto tskPtr = _selectedSTST->GetTypeTask<STSTasks::PlayAnimation>();
+
+				auto& _searchStr = dict;
+				sub::AnimationSub_catind::selectedAnimDictPtr = nullptr;
+				bool searchobj = false;
+
+				AddTitle("Favorite Animations");
+
+				AddOption(_searchStr.empty() ? "SEARCH" : boost::to_upper_copy(_searchStr), searchobj, nullFunc, -1, true); if (searchobj)
+				{
+					_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+					boost::to_lower(_searchStr);
+				}
+
+				std::vector<std::pair<std::string, std::string>> vFavAnims;
+				GetFavouriteAnimations(vFavAnims);
+				if (!vFavAnims.empty())
+				{
+					AddBreak("---Favourites---");
+					for (auto& animFav : vFavAnims)
+					{
+						bool bAnimFavPressed = false;
+						if (!_searchStr.empty()) {
+							if (animFav.first.find(_searchStr) != std::string::npos || animFav.second.find(_searchStr) != std::string::npos) {
+								AddTickol(animFav.first + ", " + animFav.second, (animFav.first == tskPtr->animDict && animFav.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
+								{
+									tskPtr->animDict = animFav.first;
+									tskPtr->animName = animFav.second;
+								}
+							}
+						}
+						else {
+							AddTickol(animFav.first + ", " + animFav.second, (animFav.first == tskPtr->animDict && animFav.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
+							{
+								tskPtr->animDict = animFav.first;
+								tskPtr->animName = animFav.second;
+							}
+						}
+					}
+				}
 			}
 			void SetActiveWeapon()
 			{

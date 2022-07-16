@@ -566,12 +566,21 @@ namespace sub
 
 		AddTitle("Favourites");
 
+		auto& _searchStr = dict;
+		bool searchobj = false;
+
+		AddOption(_searchStr.empty() ? "SEARCH" : boost::to_upper_copy(_searchStr), searchobj, nullFunc, -1, true); if (searchobj)
+		{
+			_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+			boost::to_lower(_searchStr);
+		}
+
 		for (auto& nodeAnim = nodeAnims.first_child(); nodeAnim; nodeAnim = nodeAnim.next_sibling())
 		{
 			std::string dict = nodeAnim.attribute("dict").as_string();
 			std::string name = nodeAnim.attribute("name").as_string();
-
-			AddanimOption_(dict + ", " + name, dict, name);
+			if (!_searchStr.empty()) { if (dict.find(_searchStr) != std::string::npos || name.find(_searchStr) != std::string::npos) AddanimOption_(dict + ", " + name, dict, name); }
+			else AddanimOption_(dict + ", " + name, dict, name);
 		}
 	}
 	void AnimationSub_Custom()

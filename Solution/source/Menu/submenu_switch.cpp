@@ -273,6 +273,7 @@ void Menu::submenu_switch()
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_SETTINGS:			sub::Spooner::Submenus::Sub_TaskSequence::PlayAnimation_settings(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_ALLPEDANIMS:		sub::Spooner::Submenus::Sub_TaskSequence::PlayAnimation_allPedAnims(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_ALLPEDANIMS_INDICT:sub::Spooner::Submenus::Sub_TaskSequence::PlayAnimation_allPedAnims_inDict(); break;
+	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_FAVORITEANIMS:		sub::Spooner::Submenus::Sub_TaskSequence::PlayAnimation_favoritePedAnims(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYSPEECHWITHVOICE_INVOICE:		sub::Spooner::Submenus::Sub_TaskSequence::PlaySpeechWithVoice_inVoice(); break;
 	case SUB::SPOONER_ATTACHMENTOPS:				sub::Spooner::Submenus::Sub_AttachmentOps(); break;
 	case SUB::SPOONER_ATTACHMENTOPS_ATTACHTO:		sub::Spooner::Submenus::Sub_AttachmentOps_AttachTo(); break;

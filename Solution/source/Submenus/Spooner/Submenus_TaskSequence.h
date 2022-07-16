@@ -49,6 +49,7 @@ namespace sub::Spooner
 			void PlayAnimation_settings();
 			void PlayAnimation_allPedAnims();
 			void PlayAnimation_allPedAnims_inDict();
+			void PlayAnimation_favoritePedAnims();
 			void SetActiveWeapon();
 			void AimAtCoord();
 			void AimAtEntity();
