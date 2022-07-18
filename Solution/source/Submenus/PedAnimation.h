@@ -26,6 +26,7 @@ namespace sub
 
 		extern std::map<std::string, std::vector<std::string>> vAllPedAnims;
 		extern std::pair<const std::string, std::vector<std::string>>* selectedAnimDictPtr;
+		extern std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> filteredAnims;
 
 		void PopulateAllPedAnimsList();
 
@@ -42,7 +43,18 @@ namespace sub
 
 	// Animation Favourites
 
-	void GetFavouriteAnimations(std::vector<std::pair<std::string, std::string>>& result);
+	void GetFavouriteAnimations(std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& result);
+	void FilterFavouriteAnimations(
+		std::string searchCritera,
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> anims,
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& result);
+	void FilterAnimationsByCriterias(
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& anims,
+		std::vector<std::pair<std::string, std::string>> criterias,
+		bool category
+	);
+	void SplitStringByCharacter(std::vector<std::string>& res, std::string searchString, std::string delim);
+	//std::vector<std::string> SplitStringByCharacter(std::string searchString, std::string delim);
 	bool IsAnimationAFavourite(const std::string animDict, const std::string& animName);
 	void AddAnimationToFavourites(const std::string animDict, const std::string& animName);
 	void RemoveAnimationFromFavourites(const std::string animDict, const std::string& animName);

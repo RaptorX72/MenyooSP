@@ -121,6 +121,7 @@ namespace sub
 
 		std::map<std::string, std::vector<std::string>> vAllPedAnims;
 		std::pair<const std::string, std::vector<std::string>>* selectedAnimDictPtr = nullptr;
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> filteredAnims;
 
 		void PopulateAllPedAnimsList()
 		{
@@ -238,7 +239,7 @@ namespace sub
 
 	// Animation Favourites
 
-	void GetFavouriteAnimations(std::vector<std::pair<std::string, std::string>>& result)
+	void GetFavouriteAnimations(std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& result)
 	{
 		result.clear();
 		pugi::xml_document doc;
@@ -247,11 +248,155 @@ namespace sub
 			auto& nodeAnims = doc.child("PedAnims");
 			for (auto& nodeAnim = nodeAnims.first_child(); nodeAnim; nodeAnim = nodeAnim.next_sibling())
 			{
+				std::string mainCat = nodeAnim.attribute("cat").as_string();
+				std::string subCat = nodeAnim.attribute("subcat").as_string();
 				std::string dict = nodeAnim.attribute("dict").as_string();
 				std::string name = nodeAnim.attribute("name").as_string();
 
-				result.push_back(std::make_pair(dict, name));
+				result.push_back(std::make_pair(std::make_pair(mainCat, subCat), std::make_pair(dict, name)));
 			}
+		}
+	}
+
+	void FilterFavouriteAnimations(
+		std::string searchCritera,
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> anims,
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& result
+	)
+	{
+		result = anims;
+		//check if the = exists
+		std::size_t separatorIndex = searchCritera.find('=');
+		//if not, check if we're searching categories or animations
+		if (separatorIndex == std::string::npos) {
+			std::vector<std::string> splits;
+			SplitStringByCharacter(splits, searchCritera, ",");
+			//check if we are dealing with categories
+			bool iscat = false;
+			for (std::string item : splits) {
+				if (item.find(':') != std::string::npos) {
+					iscat = true;
+					break;
+				}
+			}
+			std::vector<std::pair<std::string, std::string>> criterias;
+			for (std::string item : splits) {
+				if (iscat) {
+					std::vector<std::string> tmp;
+					SplitStringByCharacter(tmp, item, ":");
+					//in case its a category but we didn't get two terms, discard it
+					if (tmp.size() != 2) continue;
+					criterias.push_back(std::make_pair(tmp[0], tmp[1]));
+				}
+				else criterias.push_back(std::make_pair(item, ""));
+			}
+			//we check if any is empty, because that means every anim needs to be returned, which we did at the beginning
+			for (auto& item : criterias) {
+				if (iscat && item.first == "" && item.second == "") return;
+				if (!iscat && item.first == "") return;
+			}
+			//we apply the filter once, since its either categories or names only
+			FilterAnimationsByCriterias(result, criterias, iscat);
+		}
+		else {
+			std::string categories = searchCritera.substr(0, separatorIndex);
+			std::string names = searchCritera.substr(separatorIndex + 1, searchCritera.length() - separatorIndex);
+
+			//check if both are empty and then return with every anim
+			if (categories == "" && names == "") return;
+
+			//split up search terms
+			std::vector<std::string> catTmp;
+			SplitStringByCharacter(catTmp, categories, ",");
+			std::vector<std::string> nameTmp;
+			SplitStringByCharacter(nameTmp, names, ",");
+
+			//create criterias
+			std::vector<std::pair<std::string, std::string>> catCriterias;
+			std::vector<std::pair<std::string, std::string>> nameCriterias;
+			for (std::string item : catTmp) {
+				std::vector<std::string> tmp;
+				SplitStringByCharacter(tmp, item, ":");
+				//if its an invalid category we skip it
+				if (tmp.size() != 2) continue;
+				catCriterias.push_back(std::make_pair(tmp[0], tmp[1]));
+			}
+			for (std::string item : nameTmp) nameCriterias.push_back(std::make_pair(item, ""));
+
+			//check if either one has a fully blank one, which would mean every anim and no need to filter
+			bool categoriesValid = true;
+			for (auto& criteria : catCriterias) {
+				if (criteria.first == "" && criteria.second == "") {
+					categoriesValid = false;
+					break;
+				}
+			}
+			bool namesValid = true;
+			for (auto& criteria : nameCriterias) {
+				if (criteria.first == "") {
+					namesValid = false;
+					break;
+				}
+			}
+
+			//We apply the filter twice, first for the possible categories then the name matches
+			if (categoriesValid && catCriterias.size() != 0) FilterAnimationsByCriterias(result, catCriterias, true);
+			if (namesValid && nameCriterias.size() != 0) FilterAnimationsByCriterias(result, nameCriterias, false);
+		}
+	}
+
+	void SplitStringByCharacter(std::vector<std::string>& res, std::string searchString, std::string delim)
+	{
+		auto start = 0U;
+		auto end = searchString.find(delim);
+		while (end != std::string::npos)
+		{
+			res.push_back(searchString.substr(start, end - start));
+			start = end + delim.length();
+			end = searchString.find(delim, start);
+		}
+		res.push_back(searchString.substr(start, end));
+	}
+
+	void FilterAnimationsByCriterias(
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& anims,
+		std::vector<std::pair<std::string, std::string>> criterias,
+		bool category = false
+	)
+	{
+		for (int i = 0; i < anims.size(); i++)
+		{
+			auto& anim = anims[i];
+			bool match = false;
+			for (auto& criteria : criterias)
+			{
+				if (category)
+				{
+					//in case either one is empty, that means every (sub)category should be included
+					bool cat = criteria.first == "" ? true : false;
+					bool subcat = criteria.second == "" ? true : false;
+					//the inverted first term makes sure we only check if it was not empty to begin with
+					if (!cat && anim.first.first == criteria.first) cat = true;
+					if (!subcat && anim.first.second == criteria.second) subcat = true;
+					//in case both category and subcategory check out, we have a match
+					if (cat && subcat)
+					{
+						match = true;
+						break;
+					}
+				}
+				else
+				{
+					//if either the dict or the name matches the criteria, we have a match, in case of name search only first is being used
+					if (anim.second.first.find(criteria.first) != std::string::npos || anim.second.second.find(criteria.first) != std::string::npos)
+					{
+						match = true;
+						break;
+					}
+				}
+			}
+			//if a match is not found we remove the item, set the iterator back by one to not break the loop
+			if (!match) anims.erase(anims.begin() + i--);
 		}
 	}
 	bool IsAnimationAFavourite(const std::string animDict, const std::string& animName)
@@ -287,6 +432,8 @@ namespace sub
 		auto& nodeAnims = doc.child("PedAnims");
 
 		auto& nodeAnim = nodeAnims.append_child("Anim");
+		nodeAnim.append_attribute("cat") = "";
+		nodeAnim.append_attribute("subcat") = "";
 		nodeAnim.append_attribute("dict") = animDict.c_str();
 		nodeAnim.append_attribute("name") = animName.c_str();
 
@@ -554,15 +701,13 @@ namespace sub
 	}
 	void AnimationSub_Favourites()
 	{
-		pugi::xml_document doc;
-		if (doc.load_file((const char*)(GetPathffA(Pathff::Main, true) + "FavouriteAnims.xml").c_str()).status != pugi::status_ok)
-		{
+		std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> vFavAnims;
+		GetFavouriteAnimations(vFavAnims);
+		if (vFavAnims.size() == 0) {
 			Game::Print::PrintBottomCentre("~r~Error~s~: No favourites found. Go to ~b~Custom Input~s~ and add an animation to the favourites.");
 			Menu::SetSub_previous();
 			return;
 		}
-
-		auto& nodeAnims = doc.child("PedAnims");
 
 		AddTitle("Favourites");
 
@@ -573,14 +718,34 @@ namespace sub
 		{
 			_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
 			boost::to_lower(_searchStr);
+			FilterFavouriteAnimations(_searchStr, vFavAnims, AnimationSub_catind::filteredAnims);
 		}
 
-		for (auto& nodeAnim = nodeAnims.first_child(); nodeAnim; nodeAnim = nodeAnim.next_sibling())
+		if (!vFavAnims.empty())
 		{
-			std::string dict = nodeAnim.attribute("dict").as_string();
-			std::string name = nodeAnim.attribute("name").as_string();
-			if (!_searchStr.empty()) { if (dict.find(_searchStr) != std::string::npos || name.find(_searchStr) != std::string::npos) AddanimOption_(dict + ", " + name, dict, name); }
-			else AddanimOption_(dict + ", " + name, dict, name);
+			if (_searchStr.empty()) sub::AnimationSub_catind::filteredAnims = vFavAnims;
+
+			std::string catName = "";
+			for (auto& animFav : sub::AnimationSub_catind::filteredAnims)
+			{
+				bool bAnimFavPressed = false;
+				//determine anim's proper category & subcategory
+				std::string currentAnimCatName = "";
+				if (animFav.first.first == "" && animFav.first.second == "") currentAnimCatName = "NEW ANIMATIONS";
+				else
+				{
+					currentAnimCatName = animFav.first.first;
+					currentAnimCatName += animFav.first.second != "" ? (":" + animFav.first.second) : "";
+					boost::to_upper(currentAnimCatName);
+				}
+				//if the previous and current don't match, we're in a new category so add a break and update current category name string
+				if (catName != currentAnimCatName)
+				{
+					catName = currentAnimCatName;
+					AddBreak("<<<||||===--[ " + catName + " ]--===||||>>>");
+				}
+				AddanimOption_(animFav.second.first + ", " + animFav.second.second, animFav.second.first, animFav.second.second);
+			}
 		}
 	}
 	void AnimationSub_Custom()

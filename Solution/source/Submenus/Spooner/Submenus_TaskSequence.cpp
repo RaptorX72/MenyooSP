@@ -560,18 +560,33 @@ namespace sub::Spooner
 					}
 				}
 
-				std::vector<std::pair<std::string, std::string>> vFavAnims;
+				std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> vFavAnims;
 				GetFavouriteAnimations(vFavAnims);
 				if (!vFavAnims.empty())
 				{
-					AddBreak("---Favourites---");
+					std::string catName = "";
 					for (auto& animFav : vFavAnims)
 					{
 						bool bAnimFavPressed = false;
-						AddTickol(animFav.first + ", " + animFav.second, (animFav.first == tskPtr->animDict && animFav.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
+						//determine anim's proper category & subcategory
+						std::string currentAnimCatName = "";
+						if (animFav.first.first == "" && animFav.first.second == "") currentAnimCatName = "NEW ANIMATIONS";
+						else
 						{
-							tskPtr->animDict = animFav.first;
-							tskPtr->animName = animFav.second;
+							currentAnimCatName = animFav.first.first;
+							currentAnimCatName += animFav.first.second != "" ? (":" + animFav.first.second) : "";
+							boost::to_upper(currentAnimCatName);
+						}
+						//if the previous and current don't match, we're in a new category so add a break and update current category name string
+						if (catName != currentAnimCatName)
+						{
+							catName = currentAnimCatName;
+							AddBreak("--" + catName + "--");
+						}
+						AddTickol(animFav.second.first + ", " + animFav.second.second, (animFav.second.first == tskPtr->animDict && animFav.second.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
+						{
+							tskPtr->animDict = animFav.second.first;
+							tskPtr->animName = animFav.second.second;
 						}
 					}
 				}
@@ -785,36 +800,43 @@ namespace sub::Spooner
 				bool searchobj = false;
 
 				AddTitle("Favorite Animations");
+				
+				std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>> vFavAnims;
+				GetFavouriteAnimations(vFavAnims);
 
 				AddOption(_searchStr.empty() ? "SEARCH" : boost::to_upper_copy(_searchStr), searchobj, nullFunc, -1, true); if (searchobj)
 				{
 					_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
 					boost::to_lower(_searchStr);
+					FilterFavouriteAnimations(_searchStr, vFavAnims, sub::AnimationSub_catind::filteredAnims);
 				}
-
-				std::vector<std::pair<std::string, std::string>> vFavAnims;
-				GetFavouriteAnimations(vFavAnims);
 				if (!vFavAnims.empty())
 				{
-					AddBreak("---Favourites---");
-					for (auto& animFav : vFavAnims)
+					if (_searchStr.empty()) sub::AnimationSub_catind::filteredAnims = vFavAnims;
+
+					std::string catName = "";
+					for (auto& animFav : sub::AnimationSub_catind::filteredAnims)
 					{
 						bool bAnimFavPressed = false;
-						if (!_searchStr.empty()) {
-							if (animFav.first.find(_searchStr) != std::string::npos || animFav.second.find(_searchStr) != std::string::npos) {
-								AddTickol(animFav.first + ", " + animFav.second, (animFav.first == tskPtr->animDict && animFav.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
-								{
-									tskPtr->animDict = animFav.first;
-									tskPtr->animName = animFav.second;
-								}
-							}
+						//determine anim's proper category & subcategory
+						std::string currentAnimCatName = "";
+						if (animFav.first.first == "" && animFav.first.second == "") currentAnimCatName = "NEW ANIMATIONS";
+						else
+						{
+							currentAnimCatName = animFav.first.first;
+							currentAnimCatName += animFav.first.second != "" ? (":" + animFav.first.second) : "";
+							boost::to_upper(currentAnimCatName);
 						}
-						else {
-							AddTickol(animFav.first + ", " + animFav.second, (animFav.first == tskPtr->animDict && animFav.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
-							{
-								tskPtr->animDict = animFav.first;
-								tskPtr->animName = animFav.second;
-							}
+						//if the previous and current don't match, we're in a new category so add a break and update current category name string
+						if (catName != currentAnimCatName)
+						{
+							catName = currentAnimCatName;
+							AddBreak("<<<||||===--[ " + catName + " ]--===||||>>>");
+						}
+						AddTickol(animFav.second.first + ", " + animFav.second.second, (animFav.second.first == tskPtr->animDict && animFav.second.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
+						{
+							tskPtr->animDict = animFav.second.first;
+							tskPtr->animName = animFav.second.second;
 						}
 					}
 				}
