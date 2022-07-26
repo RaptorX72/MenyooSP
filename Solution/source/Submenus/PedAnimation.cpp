@@ -742,7 +742,7 @@ namespace sub
 				if (catName != currentAnimCatName)
 				{
 					catName = currentAnimCatName;
-					AddBreak("<<<||||===--[ " + catName + " ]--===||||>>>");
+					AddBreak("--" + catName + "--");
 				}
 				AddanimOption_(animFav.second.first + ", " + animFav.second.second, animFav.second.first, animFav.second.second);
 			}

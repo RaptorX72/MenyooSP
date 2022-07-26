@@ -831,7 +831,7 @@ namespace sub::Spooner
 						if (catName != currentAnimCatName)
 						{
 							catName = currentAnimCatName;
-							AddBreak("<<<||||===--[ " + catName + " ]--===||||>>>");
+							AddBreak("--" + catName + "--");
 						}
 						AddTickol(animFav.second.first + ", " + animFav.second.second, (animFav.second.first == tskPtr->animDict && animFav.second.second == tskPtr->animName), bAnimFavPressed, bAnimFavPressed); if (bAnimFavPressed)
 						{
