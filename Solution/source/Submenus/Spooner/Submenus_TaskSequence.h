@@ -83,6 +83,7 @@ namespace sub::Spooner
 		}
 		void Sub_TaskSequence_TaskList();
 		void Sub_TaskSequence_AddTask();
+		void Sub_TaskSequence_ManageTaskList();
 		void Sub_TaskSequence_InTask();
 
 	}

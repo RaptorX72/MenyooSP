@@ -65,7 +65,7 @@ namespace sub::Spooner
 	{
 		this->tasks.push_back(tskPtr);
 	}
-	STSTask* SpoonerTaskSequence::AddTask(const STSTaskType& ofType)
+	STSTask* SpoonerTaskSequence::AddTask(const STSTaskType& ofType, bool addToList)
 	{
 		STSTask* tskPtr = nullptr;
 		switch (ofType)
@@ -130,7 +130,7 @@ namespace sub::Spooner
 		case STSTaskType::EndSequence: tskPtr = (new STSTasks::EndSequence); break;
 		}
 
-		if (tskPtr != nullptr)
+		if (addToList && tskPtr != nullptr)
 			this->tasks.push_back(tskPtr);
 		return tskPtr;
 	}
@@ -172,6 +172,16 @@ namespace sub::Spooner
 	std::vector<STSTask*>& SpoonerTaskSequence::AllTasks()
 	{
 		return this->tasks;
+	}
+
+	void SpoonerTaskSequence::Clone(SpoonerTaskSequence* other)
+	{
+		tasks.clear();
+		for (auto task : other->AllTasks()) {
+			STSTask* tskPtr = AddTask(task->type, false);
+			tskPtr->Assign(task);
+			tasks.push_back(tskPtr);
+		}
 	}
 
 	bool SpoonerTaskSequence::IsActive() const

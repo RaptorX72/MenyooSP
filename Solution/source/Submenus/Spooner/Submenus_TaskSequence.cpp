@@ -47,6 +47,7 @@ namespace sub::Spooner
 	namespace Submenus
 	{
 		STSTask* _selectedSTST = nullptr;
+		std::vector<std::pair<std::string, SpoonerTaskSequence>> savedSequences;
 
 		namespace Sub_TaskSequence
 		{
@@ -1744,6 +1745,7 @@ namespace sub::Spooner
 			}
 
 			AddOption("ADD NEW", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_ADDTASK);
+			AddOption("MANAGE TASK SEQUENCES", null, nullFunc, SUB::SPOONER_TASKSEQUENCE_MANAGETASKLIST);
 
 		}
 		void Sub_TaskSequence_AddTask()
@@ -1781,6 +1783,85 @@ namespace sub::Spooner
 				}
 			}
 		}
+
+		void Sub_TaskSequence_ManageTaskList()
+		{
+			if (!SelectedEntity.Handle.Exists())
+			{
+				Menu::SetSub_previous();
+				return;
+			}
+			auto thisEntityIndexInDb = EntityManagement::GetEntityIndexInDb(SelectedEntity);
+			bool isThisEntityInDb = thisEntityIndexInDb >= 0;
+			if (!isThisEntityInDb)
+			{
+				Menu::SetSub_previous();
+				return;
+			}
+
+			AddTitle("SAVED TASK SEQUENCES");
+
+			auto& thisEntity = Databases::EntityDb[thisEntityIndexInDb];
+
+			bool bTaskTypePressed = false;
+			AddOption("Save current task sequence", bTaskTypePressed); if (bTaskTypePressed)
+			{
+				std::string inputStr = Game::InputBox("", 126U, "Task sequence name", "");
+				
+				if (inputStr.length() <= 0) {
+					Menu::SetSub_previous();
+					return;
+				}
+
+				std::pair<std::string, SpoonerTaskSequence> newEntry;
+				
+				newEntry.first = inputStr;
+				
+				SpoonerTaskSequence sts = SpoonerTaskSequence();
+				sts.Clone(&SelectedEntity.TaskSequence);
+				newEntry.second = sts;
+				
+				savedSequences.push_back(newEntry);
+				
+				Menu::SetSub_previous();
+				return;
+			}
+
+			int counter = 0;
+			for (auto& sequence : savedSequences)
+			{
+				bool bTaskTypePressed = false;
+				AddOption(sequence.first, bTaskTypePressed); if (bTaskTypePressed)
+				{
+					SpoonerTaskSequence sts = SpoonerTaskSequence();
+					sts.Clone(&sequence.second);
+					thisEntity.TaskSequence = sts;
+					SelectedEntity.TaskSequence = sts;
+
+					Menu::SetSub_previous();
+					return;
+				}
+
+				if (Menu::printingop == *Menu::currentopATM)
+				{
+					bool bRemoveTaskPressed = false;
+					char bMoveTaskPressed = 0i8;
+					if (Menu::bit_controller)
+					{
+						Menu::add_IB(INPUT_SCRIPT_RLEFT, "Remove");
+						bRemoveTaskPressed = IS_DISABLED_CONTROL_JUST_PRESSED(2, INPUT_SCRIPT_RLEFT) != 0;
+					}
+					else
+					{
+						Menu::add_IB(VirtualKey::B, "Remove");
+						bRemoveTaskPressed = IsKeyJustUp(VirtualKey::B);
+					}
+					if (bRemoveTaskPressed) savedSequences.erase(savedSequences.begin() + counter);
+					else counter++;
+				}
+			}
+		}
+
 		void Sub_TaskSequence_InTask()
 		{
 			auto tskPtr = _selectedSTST;

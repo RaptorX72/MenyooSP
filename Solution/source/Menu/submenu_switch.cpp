@@ -270,6 +270,7 @@ void Menu::submenu_switch()
 	case SUB::SPOONER_PEDOPS_WEAPON_INCATEGORY:		sub::Spooner::Submenus::Sub_PedOps_Weapon_InCategory(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKLIST:								sub::Spooner::Submenus::Sub_TaskSequence_TaskList(); break;
 	case SUB::SPOONER_TASKSEQUENCE_ADDTASK:									sub::Spooner::Submenus::Sub_TaskSequence_AddTask(); break;
+	case SUB::SPOONER_TASKSEQUENCE_MANAGETASKLIST:							sub::Spooner::Submenus::Sub_TaskSequence_ManageTaskList(); break;
 	case SUB::SPOONER_TASKSEQUENCE_INTASK:									sub::Spooner::Submenus::Sub_TaskSequence_InTask(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_SCENARIOACTION_LIST:				sub::Spooner::Submenus::Sub_TaskSequence::ScenarioAction_list(); break;
 	case SUB::SPOONER_TASKSEQUENCE_TASKSUB_PLAYANIMATION_SETTINGS:			sub::Spooner::Submenus::Sub_TaskSequence::PlayAnimation_settings(); break;

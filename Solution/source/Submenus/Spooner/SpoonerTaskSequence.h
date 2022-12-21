@@ -42,7 +42,7 @@ namespace sub::Spooner
 		bool empty() const;
 
 		inline void AddTask(STSTask* tskPtr);
-		STSTask* AddTask(const STSTaskType& ofType);
+		STSTask* AddTask(const STSTaskType& ofType, bool addToList = true);
 
 		static void DeallocTask(STSTask* tskPtr);
 		void RemoveTask(UINT16 index);
@@ -50,6 +50,8 @@ namespace sub::Spooner
 		void SwapTasks(UINT16 index1, UINT16 index2);
 
 		std::vector<STSTask*>& AllTasks();
+
+		void Clone(SpoonerTaskSequence* other);
 
 		bool IsActive() const;
 		void Start();
