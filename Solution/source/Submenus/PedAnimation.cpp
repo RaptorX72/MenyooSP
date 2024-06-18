@@ -439,7 +439,7 @@ namespace sub
 
 		auto nodeAnims = doc.child("PedAnims");
 
-		auto& nodeAnim = nodeAnims.append_child("Anim");
+		auto nodeAnim = nodeAnims.append_child("Anim");
 		nodeAnim.append_attribute("cat") = "";
 		nodeAnim.append_attribute("subcat") = "";
 		nodeAnim.append_attribute("dict") = animDict.c_str();
