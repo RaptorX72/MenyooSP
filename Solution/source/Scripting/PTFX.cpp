@@ -80,7 +80,7 @@ namespace PTFX
 	{
 		if (this->IsAssetLoaded())
 		{
-			_REMOVE_NAMED_PTFX_ASSET((PCHAR)this->asset.c_str());
+			REMOVE_NAMED_PTFX_ASSET((PCHAR)this->asset.c_str());
 		}
 	}
 
@@ -91,7 +91,7 @@ namespace PTFX
 
 		this->scale = scale;
 
-		_SET_PTFX_ASSET_NEXT_CALL((PCHAR)this->asset.c_str());
+		USE_PARTICLE_FX_ASSET((PCHAR)this->asset.c_str());
 
 		if (bone == -1)
 		{
@@ -101,7 +101,7 @@ namespace PTFX
 		{
 			if (entity.IsPed())
 				bone = GET_PED_BONE_INDEX(entity.Handle(), bone);
-			this->mHandle = _START_PARTICLE_FX_LOOPED_ON_ENTITY_BONE((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, bone, scale, 0, 0, 0);
+			this->mHandle = START_PARTICLE_FX_LOOPED_ON_ENTITY_BONE((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, bone, scale, 0, 0, 0);
 		}
 
 		this->SetColour(RgbS(col.R, col.G, col.B));
@@ -144,7 +144,7 @@ namespace PTFX
 
 		this->scale = scale;
 
-		_SET_PTFX_ASSET_NEXT_CALL((PCHAR)this->asset.c_str());
+		USE_PARTICLE_FX_ASSET((PCHAR)this->asset.c_str());
 
 		this->mHandle = START_PARTICLE_FX_LOOPED_AT_COORD((PCHAR)this->effect.c_str(),
 			position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0, 0);
@@ -255,16 +255,14 @@ namespace PTFX
 	}
 	bool NonLoopedPTFX::LoadAsset(DWORD timeOut)
 	{
-		PCHAR assetName = const_cast<PCHAR>(this->asset.c_str());
-
-		if (HAS_NAMED_PTFX_ASSET_LOADED(assetName)) return true;
+		if (HAS_NAMED_PTFX_ASSET_LOADED(asset.c_str())) return true;
 		else
 		{
-			REQUEST_NAMED_PTFX_ASSET(assetName);
+			REQUEST_NAMED_PTFX_ASSET(asset.c_str());
 
 			for (timeOut += GetTickCount(); GetTickCount() < timeOut;)
 			{
-				if (HAS_NAMED_PTFX_ASSET_LOADED(assetName)) return true;
+				if (HAS_NAMED_PTFX_ASSET_LOADED(asset.c_str())) return true;
 				WAIT(0);
 			}
 			return false;
@@ -274,25 +272,25 @@ namespace PTFX
 	{
 		if (this->IsAssetLoaded())
 		{
-			_REMOVE_NAMED_PTFX_ASSET((PCHAR)this->asset.c_str());
+			REMOVE_NAMED_PTFX_ASSET((PCHAR)this->asset.c_str());
 		}
 	}
 
 	// pedBone does not require GetBoneIndex for peds.
 	void NonLoopedPTFX::Start(GTAentity entity, float scale, const Vector3& offset, const Vector3& rotation, RGBA col, int pedBone)
 	{
-		_SET_PTFX_ASSET_NEXT_CALL((PCHAR)this->asset.c_str());
+		USE_PARTICLE_FX_ASSET((PCHAR)this->asset.c_str());
 
 		NonLoopedPTFX::SetColour(RgbS(col.R, col.G, col.B));
 		NonLoopedPTFX::SetAlpha(col.B);
 
 		if (pedBone == -1)
 		{
-			_START_PARTICLE_FX_NON_LOOPED_ON_ENTITY_2((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
+			START_NETWORKED_PARTICLE_FX_NON_LOOPED_ON_ENTITY((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
 		}
 		else
 		{
-			_START_PARTICLE_FX_NON_LOOPED_ON_PED_BONE_2((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, pedBone, scale, 0, 0, 0);
+			START_NETWORKED_PARTICLE_FX_NON_LOOPED_ON_PED_BONE((PCHAR)this->effect.c_str(), entity.Handle(), offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, pedBone, scale, 0, 0, 0);
 		}
 	}
 	// pedBone does not require GetBoneIndex for peds.
@@ -322,10 +320,10 @@ namespace PTFX
 
 	void NonLoopedPTFX::Start(const Vector3& position, float scale, const Vector3& rotation)
 	{
-		_SET_PTFX_ASSET_NEXT_CALL((PCHAR)this->asset.c_str());
+		USE_PARTICLE_FX_ASSET((PCHAR)this->asset.c_str());
 
-		_START_PARTICLE_FX_NON_LOOPED_AT_COORD_2((PCHAR)this->effect.c_str(),
-			position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
+		START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD((PCHAR)this->effect.c_str(),
+			position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0, false);
 	}
 	void NonLoopedPTFX::EasyStart(const Vector3& position, float scale, const Vector3& rotation)
 	{
@@ -361,18 +359,16 @@ namespace PTFX
 	}
 #pragma endregion
 
-	void trigger_ptfx_1(const std::string& asset2, const std::string& name2, GTAentity entity, Vector3 position, Vector3 rotation, float scale, int pedBone)
+	void trigger_ptfx_1(const std::string& asset, const std::string& name, GTAentity entity, Vector3 position, Vector3 rotation, float scale, int pedBone)
 	{
-		PCHAR asset = const_cast<PCHAR>(asset2.c_str());
-		PCHAR name = const_cast<PCHAR>(name2.c_str());
 
-		REQUEST_NAMED_PTFX_ASSET(asset);
-		if (HAS_NAMED_PTFX_ASSET_LOADED(asset))
+		REQUEST_NAMED_PTFX_ASSET(asset.c_str());
+		if (HAS_NAMED_PTFX_ASSET_LOADED(asset.c_str()))
 		{
-			_SET_PTFX_ASSET_NEXT_CALL(asset);
+			USE_PARTICLE_FX_ASSET(asset.c_str());
 			SET_PARTICLE_FX_NON_LOOPED_COLOUR(GET_RANDOM_FLOAT_IN_RANGE(0.0f, 1.0f), GET_RANDOM_FLOAT_IN_RANGE(0.0f, 1.0f), GET_RANDOM_FLOAT_IN_RANGE(0.0f, 1.0f));
 			if (entity.Handle() == 0)
-				_START_PARTICLE_FX_NON_LOOPED_AT_COORD_2(name, position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
+				START_NETWORKED_PARTICLE_FX_NON_LOOPED_AT_COORD(name.c_str(), position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0, false);
 			else
 			{
 				if (entity.Exists())
@@ -380,11 +376,11 @@ namespace PTFX
 					//entity.RequestControlOnce();
 					if (pedBone != -1)
 					{
-						_START_PARTICLE_FX_NON_LOOPED_ON_PED_BONE_2(name, entity.Handle(), position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, pedBone, scale, 0, 0, 0);
+						START_NETWORKED_PARTICLE_FX_NON_LOOPED_ON_PED_BONE(name.c_str(), entity.Handle(), position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, pedBone, scale, 0, 0, 0);
 					}
 					else
 					{
-						_START_PARTICLE_FX_NON_LOOPED_ON_ENTITY_2(name, entity.Handle(), position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
+						START_NETWORKED_PARTICLE_FX_NON_LOOPED_ON_ENTITY(name.c_str(), entity.Handle(), position.x, position.y, position.z, rotation.x, rotation.y, rotation.z, scale, 0, 0, 0);
 					}
 				}
 			}

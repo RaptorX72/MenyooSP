@@ -59,7 +59,7 @@ namespace sub
 
 			if (newPed.Exists())
 			{
-				Vector3& vehPos = vehicle.Position_get();
+				const Vector3& vehPos = vehicle.Position_get();
 				newPed.BlockPermanentEvents_set(true);
 				TASK_HELI_MISSION(newPed.Handle(), vehicle.Handle(), 0, 0, vehPos.x, vehPos.y, vehPos.z, 4, 0.0f, 50.0f, -1.0f, 10000, 100, -1082130432, 0);
 				newPed.AlwaysKeepTask_set(true);
@@ -127,10 +127,10 @@ namespace sub
 		GTAplayer myPlayer = Static_240;
 		GTAvehicle myVehicle = g_myVeh;
 		bool bMyPedIsInVehicle = myPed.IsInVehicle();
-		Model& myVehicleModel = myVehicle.Model();
+		const Model& myVehicleModel = myVehicle.Model();
 
 		static int __VechicleOpsFixCar_texterVal = 0;
-		static std::vector<std::string> __VechicleOpsFixCar_texter{ "Full", "Keep windows open" };
+		static std::vector<std::string> __VechicleOpsFixCar_texter{ "Full", "Keep Dirt", "Keep windows open", "Keep windows open with Dirt"};
 		auto& fixCarTexterVal = __VechicleOpsFixCar_texterVal;
 		auto& fixCarTexter = __VechicleOpsFixCar_texter;
 		bool bFixCar_plus = false, bFixCar_minus = false;
@@ -141,7 +141,7 @@ namespace sub
 			AddLocal("Cargobob Magnet", myVehicle.IsCargobobHookActive(CargobobHook::Magnet), bToggleCargobobMagnet, bToggleCargobobMagnet);
 		if (myVehicleModel.hash == VEHICLE_MAVERICK || myVehicleModel.hash == VEHICLE_POLMAV)
 			AddOption("Rappel From Helicopter", VehicleOpsRappelHeli);
-		if (myVehicleModel.HasSiren())
+		if (myVehicle.HasSiren_get())
 			AddToggle("Disable Vehicle Siren", loop_vehicle_disableSiren, null, disableSiren_off);
 		if (bMyPedIsInVehicle)
 			AddTexter("CMOD_MOD_MNT", fixCarTexterVal, fixCarTexter, VehicleOpsFixCar_, bFixCar_plus, bFixCar_minus, true); // Fix & Wash
@@ -213,7 +213,7 @@ namespace sub
 			}
 		}
 
-		if (disableSiren_off) DISABLE_VEHICLE_IMPACT_EXPLOSION_ACTIVATION(g_myVeh, FALSE);
+		if (disableSiren_off) SET_VEHICLE_HAS_MUTED_SIRENS(g_myVeh, FALSE);
 
 		if (VehicleOps_Slam_On) { Game::Print::PrintBottomCentre("~b~Note:~s~ If you try hard enough, you can drive on walls too!"); return; }
 
@@ -258,7 +258,7 @@ namespace sub
 			CarType |= 8;
 			int tempVehicle = GET_CLOSEST_VEHICLE(myPos.x, myPos.y, myPos.z, 400.0f, 0, CarType);
 			if (DOES_ENTITY_EXIST(tempVehicle)) SET_PED_INTO_VEHICLE(Static_241, tempVehicle, tempVehicle.FirstFreeSeat(SEAT_DRIVER));*/
-			auto& tempVehicle = World::GetClosestVehicle(myPed.Position_get(), FLT_MAX);
+			const GTAvehicle& tempVehicle = World::GetClosestVehicle(myPed.Position_get(), FLT_MAX);
 			if (tempVehicle.Exists())
 				myPed.SetIntoVehicle(tempVehicle, tempVehicle.FirstFreeSeat(SEAT_DRIVER));
 			return;
@@ -273,7 +273,7 @@ namespace sub
 			else
 			{
 				std::vector<VehicleWindow> windowsToOpen;
-				if (fixCarTexterVal == 1)
+				if (fixCarTexterVal == 1 || fixCarTexterVal == 3)
 				{
 					for (int i = (int)VehicleWindow::FrontLeftWindow; i < (int)VehicleWindow::Last; i++)
 					{
@@ -282,18 +282,20 @@ namespace sub
 					}
 				}
 
+
 				myVehicle.RequestControlOnce();
 				SET_VEHICLE_FIXED(g_myVeh);
-				SET_VEHICLE_DIRT_LEVEL(g_myVeh, 0.0f);
+				if(fixCarTexterVal == 0 || fixCarTexterVal == 2)
+					SET_VEHICLE_DIRT_LEVEL(g_myVeh, 0.0f);
 				SET_VEHICLE_ENGINE_CAN_DEGRADE(g_myVeh, 0);
 				SET_VEHICLE_ENGINE_HEALTH(g_myVeh, 1250.0f);
 				SET_VEHICLE_PETROL_TANK_HEALTH(g_myVeh, 1250.0f);
 				SET_VEHICLE_BODY_HEALTH(g_myVeh, 1250.0f);
 				SET_VEHICLE_UNDRIVEABLE(g_myVeh, 0);
 				if (!GET_IS_VEHICLE_ENGINE_RUNNING(g_myVeh))
-					SET_VEHICLE_ENGINE_ON(g_myVeh, 1, 1);
+					SET_VEHICLE_ENGINE_ON(g_myVeh, 1, 1, 0);
 
-				if (fixCarTexterVal == 1)
+				if (fixCarTexterVal == 1 || fixCarTexterVal == 3)
 				{
 					for (auto& i : windowsToOpen)
 					{
@@ -653,7 +655,7 @@ namespace sub
 			if (!pv.Exists()) Game::Print::PrintBottomCentre("~r~Error:~s~ No longer in memory.");
 			else
 			{
-				Vector3& myPos = myPed.Position_get();
+				const Vector3& myPos = myPed.Position_get();
 				pv.RequestControl(600);
 				pv.Position_set(myPos);
 			}
@@ -807,7 +809,7 @@ namespace sub
 					ScrHandle tsk;
 					OPEN_SEQUENCE_TASK(&tsk);
 
-					TASK_PLANE_MISSION(0, vehicle.Handle(), 0, 0, destination.x, destination.y, destination.z, 4, speed, 50.0f, -1.0f, 100, 200);
+					TASK_PLANE_MISSION(0, vehicle.Handle(), 0, 0, destination.x, destination.y, destination.z, 4, speed, 50.0f, -1.0f, 100.0f, 200.0f, false);
 
 					CLOSE_SEQUENCE_TASK(tsk);
 					TASK_PERFORM_SEQUENCE(myPed.Handle(), tsk);
@@ -838,22 +840,22 @@ namespace sub
 
 			inline void PushEmAway()
 			{
-				auto& md = vehicleModel.Dimensions();
-				auto& pos = vehicle.Position_get();
-				auto& rot = vehicle.Rotation_get();
-				auto& dir = Vector3::RotationToDirection(rot);
+				const auto& md = vehicleModel.Dimensions();
+				const auto& pos = vehicle.Position_get();
+				const auto& rot = vehicle.Rotation_get();
+				const auto& dir = Vector3::RotationToDirection(rot);
 
-				auto& ray = RaycastResult::RaycastCapsule(pos, dir, 3.2f + md.Dim1.y, 2.3f, IntersectOptions::Everything, vehicle);
+				auto ray = RaycastResult::RaycastCapsule(pos, dir, 3.2f + md.Dim1.y, 2.3f, IntersectOptions::Everything, vehicle);
 				//auto& ray = RaycastResult::Raycast(pos, dir, 5.0f, IntersectOptions::Everything, vehicle);
 				//auto& ray = RaycastResult::Raycast(pos + (dir * md.Dim1.y), pos + (dir * (md.Dim1.y + 4.3f)), IntersectOptions::Everything);
 
 				if (ray.DidHitEntity())
 				{
-					auto& thingInFront = ray.HitEntity();
+					GTAentity thingInFront = ray.HitEntity();
 					thingInFront.ApplyForce(dir * 10.0f);
 				}
 
-				auto& myFrontBumper = pos + (dir * md.Dim1.y);
+				const Vector3& myFrontBumper = pos + (dir * md.Dim1.y);
 
 				for (GTAvehicle v : _nearbyVehicles)
 				{
@@ -882,7 +884,7 @@ namespace sub
 
 		void Sub_AutoDrive()
 		{
-			GTAped& myPed = Game::PlayerPed();
+			GTAped myPed = Game::PlayerPed();
 
 			auto& speed = Methods.speed;
 			auto& drivingStyle = Methods.drivingStyle;
@@ -1244,7 +1246,7 @@ namespace sub
 
 					if (_speedoAlpha < 255) _speedoAlpha += 5;
 
-					UINT8 clockHour = TIME::GET_CLOCK_HOURS();
+					UINT8 clockHour = GET_CLOCK_HOURS();
 					if (clockHour < 19 && clockHour > 7)
 						_currentSpeedoNeedle = { vSpeedoImageNames_All[0].at(0).fileName, vSpeedoImageNames_All[0].at(0).id }; // Day
 					else
@@ -1252,8 +1254,8 @@ namespace sub
 
 					/*if (HAS_STREAMED_TEXTURE_DICT_LOADED("MenyooExtras"))
 					{
-						PCHAR bg_name = const_cast<PCHAR>(_currentSpeedoBg.fileName.c_str());
-						PCHAR needle_name = const_cast<PCHAR>(_currentSpeedoNeedle.fileName.c_str());
+						PCHAR bg_name = _currentSpeedoBg.fileName.c_str();
+						PCHAR needle_name = _currentSpeedoNeedle.fileName.c_str();
 
 						Vector3 res = GET_TEXTURE_RESOLUTION("MenyooExtras", bg_name);
 						res.x = res.x * 0.66 / Game::defaultScreenRes.first;

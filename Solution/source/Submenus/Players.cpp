@@ -74,7 +74,7 @@ namespace sub
 				if (!NETWORK_IS_PLAYER_ACTIVE(i)) continue;
 				ped = GET_PLAYER_PED(i);
 				if (!DOES_ENTITY_EXIST(ped)) continue;
-				_0x419594E137637120(0, ped, 1);
+				NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, ped, 1);
 				NETWORK_SET_IN_SPECTATOR_MODE(false, ped);
 			}
 			ped = GET_PLAYER_PED(loop_spectate_player);
@@ -92,7 +92,7 @@ namespace sub
 				if (!NETWORK_IS_PLAYER_ACTIVE(i)) continue;
 				ped = GET_PLAYER_PED(i);
 				if (!DOES_ENTITY_EXIST(ped)) continue;
-				_0x419594E137637120(0, ped, 1);
+				NETWORK_SET_IN_SPECTATOR_MODE_EXTENDED(0, ped, 1);
 				NETWORK_SET_IN_SPECTATOR_MODE(false, ped);
 			}
 			NETWORK_SET_ACTIVITY_SPECTATOR(false);
@@ -104,10 +104,10 @@ namespace sub
 			GTAplayer player = Static_240;
 			if (player.IsActive())
 			{
-				GTAped& playerPed = player.GetPed();
+				const GTAped& playerPed = player.GetPed();
 				if (playerPed.IsAlive())
 				{
-					Vector3& pos = playerPed.Position_get();
+					const Vector3& pos = playerPed.Position_get();
 					SET_NEW_WAYPOINT(pos.x, pos.y);
 				}
 				else

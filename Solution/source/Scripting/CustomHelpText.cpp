@@ -12,6 +12,7 @@
 #include "..\macros.h"
 
 #include "..\Natives\natives2.h"
+#include "..\Menu\Language.h"
 
 #include <Windows.h> // PCHAR, GetTickCount
 #include <string>
@@ -35,30 +36,28 @@ namespace Game
 
 	void CustomHelpText::SetText(const std::string& newText)
 	{
-		_text = _tag + newText;
+		_text = _tag + Language::TranslateToSelected(newText);
 	}
 
 	void CustomHelpText::ShowThisFrame(const std::string& textToShow)
 	{
-		PCHAR textToShow_c = const_cast<PCHAR>(textToShow.c_str());
-
-		if (DOES_TEXT_LABEL_EXIST(textToShow_c))
+		if (DOES_TEXT_LABEL_EXIST(textToShow.c_str()))
 		{
-			DISPLAY_HELP_TEXT_THIS_FRAME(textToShow_c, 0);
+			DISPLAY_HELP_TEXT_THIS_FRAME(textToShow.c_str(), 0);
 		}
 		else
 		{
 			if (textToShow.length() < 100)
 			{
-				_SET_TEXT_COMPONENT_FORMAT("STRING");
-				ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(textToShow_c);
+				BEGIN_TEXT_COMMAND_DISPLAY_HELP("STRING");
+				ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(textToShow.c_str());
 			}
 			else
 			{
-				_SET_TEXT_COMPONENT_FORMAT("jamyfafi");
+				BEGIN_TEXT_COMMAND_DISPLAY_HELP("jamyfafi");
 				add_text_component_long_string(textToShow);
 			}
-			_DISPLAY_HELP_TEXT_FROM_STRING_LABEL(0, false, false, -1);
+			END_TEXT_COMMAND_DISPLAY_HELP(0, false, false, -1);
 			//DISPLAY_HELP_TEXT_THIS_FRAME("STRING", 0);
 		}
 
@@ -81,7 +80,7 @@ namespace Game
 	{
 		/*if (Drawing())
 		{
-		UI::HIDE_HELP_TEXT_THIS_FRAME();
+			HIDE_HELP_TEXT_THIS_FRAME();
 		}*/
 		_timer = 0;
 	}

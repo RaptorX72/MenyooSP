@@ -14,6 +14,7 @@
 #include "..\Natives\natives2.h"
 #include "..\Scripting\enums.h"
 #include "..\Scripting\Game.h"
+#include "..\Menu\Menu.h"
 
 // death model check
 #include "..\Scripting\Model.h"
@@ -43,21 +44,25 @@ namespace _ManualRespawn_
 	{
 		GenericLoopedMode::TurnOff();
 
-		GAMEPLAY::_DISABLE_AUTOMATIC_RESPAWN(false);
-		SCRIPT::SET_NO_LOADING_SCREEN(false);
-		GAMEPLAY::SET_FADE_OUT_AFTER_DEATH(true);
-		GAMEPLAY::SET_FADE_OUT_AFTER_ARREST(true);
+		PAUSE_DEATH_ARREST_RESTART(false);
+		SET_NO_LOADING_SCREEN(false);
+		SET_FADE_OUT_AFTER_DEATH(true);
+		SET_FADE_OUT_AFTER_ARREST(true);
 	}
 
 	bool ManualRespawn::IsSkipPressed()
 	{
-		return IS_DISABLED_CONTROL_JUST_PRESSED(0, INPUT_LOOK_BEHIND) != 0;
+		return IS_DISABLED_CONTROL_JUST_PRESSED(0, respawnbinds) != 0;
 	}
 
 	inline void ManualRespawn::ShowRespawnHelpText()
 	{
+		std::string bindsname = "button";
+		try { bindsname = ControllerInputs::vNames.at(respawnbinds); }
+		catch (...) {}
+
 		Game::Print::setupdraw(GTAfont::Arial, Vector2(0, 0.4f), false, true, false, RGBA(255, 255, 255, 190));
-		Game::Print::drawstring("Press ~b~[LOOK BEHIND]~s~ to respawn.", NULL, 0.1f);
+		Game::Print::drawstring("Press ~b~[" + bindsname + "]~s~ to respawn.", NULL, 0.1f);
 		//Game::CustomHelpText::ShowTimedText(oss_ << "Press " << "~INPUT_LOOK_BEHIND~" << " to respawn.", 100);
 	}
 
@@ -76,7 +81,7 @@ namespace _ManualRespawn_
 		{
 			if (IsSkipPressed())
 			{
-				_DISABLE_AUTOMATIC_RESPAWN(false);
+				PAUSE_DEATH_ARREST_RESTART(false);
 				SET_NO_LOADING_SCREEN(false);
 				SET_FADE_OUT_AFTER_DEATH(true);
 				SET_FADE_OUT_AFTER_ARREST(true);
@@ -85,7 +90,7 @@ namespace _ManualRespawn_
 			}
 			else if (!inRespawn)
 			{
-				_DISABLE_AUTOMATIC_RESPAWN(true);
+				PAUSE_DEATH_ARREST_RESTART(true);
 				SET_NO_LOADING_SCREEN(true);
 				SET_FADE_OUT_AFTER_DEATH(false);
 				SET_FADE_OUT_AFTER_ARREST(false);
@@ -123,10 +128,10 @@ namespace _ManualRespawn_
 
 		if ((!is_death && !is_arrest) || _ManualRespawn_::g_manualRespawn.InRespawn())
 			return;
-		if (_GET_NUMBER_OF_INSTANCES_OF_STREAMED_SCRIPT(0xCAC8014F) > 0)//director_mode.ysc
+		if (GET_NUMBER_OF_THREADS_RUNNING_THE_SCRIPT_WITH_THIS_HASH(0xCAC8014F) > 0)//director_mode.ysc
 			return;
 
-		Model& model = playerPed.Model();
+		Model model = playerPed.Model();
 		Model orig_model;
 
 
@@ -147,7 +152,7 @@ namespace _ManualRespawn_
 			tid2[i] = GET_PED_PROP_TEXTURE_INDEX(playerPed, i);
 			}*/
 
-			std::string& ofn = GetPathffA(Pathff::Outfit, true) + "_reserved.xml";
+			const std::string& ofn = GetPathffA(Pathff::Outfit, true) + "_reserved.xml";
 			sub::ComponentChanger_Outfit_catind::Create(PLAYER_PED_ID(), ofn);
 
 

@@ -26,14 +26,14 @@ namespace sub::TeleportLocations_catind
 {
 	namespace IeVehicleWarehouses
 	{
-		struct IeWarehouseLocation { const PCHAR name; Vector3 pos; const PCHAR ipl; };
+		struct IeWarehouseLocation { const std::string name; Vector3 pos; const std::string ipl; };
 		const std::vector<IeWarehouseLocation> vLocations
 		{
 			{ "Warehouse",{ 973.5615f, -2999.5610f, -39.6470f }, "imp_impexp_interior_placement_interior_1_impexp_intwaremed_milo_" },
 			{ "Vehicle Bunker",{ 1001.2706f, -2997.8494f, -47.6470f }, "imp_impexp_interior_placement_interior_3_impexp_int_02_milo_" }
 		};
 
-		struct IeWarehouseInteriorOption { const PCHAR name; const PCHAR value; };
+		struct IeWarehouseInteriorOption { const std::string name; const std::string value; };
 		const std::vector<IeWarehouseInteriorOption> vStyleSetOptions
 		{
 			{ "None", "" },
@@ -70,7 +70,7 @@ namespace sub::TeleportLocations_catind
 		IeWarehouseInfoStructure currentWarehouseInfo = { nullptr, 0, 0 };
 
 		struct IeWarehouseInteriorOptionArray {
-			const PCHAR name; UINT8* ptr; const std::vector<IeWarehouseInteriorOption>* arr;
+			const std::string name; UINT8* ptr; const std::vector<IeWarehouseInteriorOption>* arr;
 		} vOptionArrays[]{
 			{ "Style", &currentWarehouseInfo.styleSetOption, &vStyleSetOptions },
 			{ "Basement Pump", &currentWarehouseInfo.pumpOption, &vPumpOptions }
@@ -84,24 +84,24 @@ namespace sub::TeleportLocations_catind
 				auto& loc = *info.location;
 				auto& pos = loc.pos;
 
-				_ENABLE_MP_DLC_MAPS(true);
-				_LOAD_MP_DLC_MAPS();
-				REQUEST_IPL(loc.ipl);
+				SET_INSTANCE_PRIORITY_MODE(true);
+				ON_ENTER_MP();
+				REQUEST_IPL(loc.ipl.c_str());
 				int interior = GET_INTERIOR_AT_COORDS(pos.x, pos.y, pos.z);
 				DISABLE_INTERIOR(interior, true);
-				_LOAD_INTERIOR(interior);
+				PIN_INTERIOR_IN_MEMORY(interior);
 				DISABLE_INTERIOR(interior, false);
-				_ENABLE_MP_DLC_MAPS(false);
+				SET_INSTANCE_PRIORITY_MODE(false);
 				WAIT(200);
 
 				for (auto& oa : vOptionArrays)
 				{
 					for (auto& o : *oa.arr)
-						_DISABLE_INTERIOR_PROP(interior, const_cast<PCHAR>(o.value));
+						DEACTIVATE_INTERIOR_ENTITY_SET(interior, o.value.c_str());
 				}
 				for (auto& oa : vOptionArrays)
 				{
-					_ENABLE_INTERIOR_PROP(interior, const_cast<PCHAR>(oa.arr->at(*oa.ptr).value));
+					ACTIVATE_INTERIOR_ENTITY_SET(interior, oa.arr->at(*oa.ptr).value.c_str());
 				}
 				REFRESH_INTERIOR(interior);
 			}

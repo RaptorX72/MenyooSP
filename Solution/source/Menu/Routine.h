@@ -69,7 +69,7 @@ extern Hash kaboom_gun_hash, bullet_gun_hash;
 extern GTAmodel::Model ped_gun_hash, object_gun_hash;
 extern FLOAT current_timescale;
 extern INT Static_241, Static_240, Static_242, Static_12;
-extern PCHAR Static_239;
+extern const char* Static_239;
 extern INT bit_MSPaints_RGB_mode;
 extern bool kaboom_gun_invis, kaboom_gun_rand_bit, ped_gun_rand_bit, object_gun_rand_bit_o, object_gun_rand_bit_v;
 extern bool bit_night_vision;
@@ -90,7 +90,7 @@ extern std::string dict, dict2, dict3;
 extern std::string _globalSpawnVehicle_plateText;
 extern INT8 _globalSpawnVehicle_plateType, _globalSpawnVehicle_plateTexter_value;
 extern RgbS _globalSpawnVehicle_neonCol;
-extern bool _globalSpawnVehicle_autoSit, _globalSpawnVehicle_autoUpgrade, _globalSpawnVehicle_invincible, _globalSpawnVehicle_deleteOld, _globalSpawnVehicle_neonToggle, _globalLSC_Customs;
+extern bool _globalSpawnVehicle_autoSit, _globalSpawnVehicle_autoUpgrade, _globalSpawnVehicle_invincible, _globalSpawnVehicle_persistent, _globalSpawnVehicle_deleteOld, _globalSpawnVehicle_neonToggle, _globalLSC_Customs;
 extern INT16 _globalSpawnVehicle_PrimCol, _globalSpawnVehicle_SecCol;
 extern bool _globalSpawnVehicle_drawBmps;
 extern FLOAT _globalClearArea_radius;
@@ -163,6 +163,7 @@ void set_massacre_mode_tick();
 
 // Misc
 void set_blackoutEmp_mode();
+void set_blackout_mode();
 
 // Playerped - ability
 void set_self_nearby_peds_calm();

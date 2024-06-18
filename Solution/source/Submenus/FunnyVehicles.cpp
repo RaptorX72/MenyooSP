@@ -44,7 +44,7 @@ namespace sub
 					{
 						if (vehicle.IsSeatFree(VehicleSeat(i)))
 							continue;
-						GTAentity& sped = vehicle.GetPedOnSeat(VehicleSeat(i));
+						GTAentity sped = vehicle.GetPedOnSeat(VehicleSeat(i));
 						sped.RequestControl();
 						sped.SetVisible(true);
 					}
@@ -53,15 +53,15 @@ namespace sub
 				Ped ped = CREATE_PED(PedType::Human, model.hash, 0.0f, 0.0f, 0.0f, vehicle.Heading_get(), 1, 1);
 				PED_TO_NET(ped);
 				SET_ENTITY_LOD_DIST(ped, 696969);
-				ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 180.0f, 0, 0, 0, 0, 2, 1);
+				ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 180.0f, 0, 0, 0, 0, 2, 1, 0);
 				DETACH_ENTITY(ped, 1, 1);
-				ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, 0, 0, 0, 0, 2, 1);
+				ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, offset.x, offset.y, offset.z, rotation.x, rotation.y, rotation.z, 0, 0, 0, 0, 2, 1, 0);
 				SET_BLOCKING_OF_NON_TEMPORARY_EVENTS(ped, 1);
 				if (piggyback)
 				{
 					//Hash == PedHash::TigerShark ?
 					//ATTACH_ENTITY_TO_ENTITY(ped, vehicle, -1, 0.0f, -0.3f, 0.0f, 0.0f, 180.0f, 0.0f, 1, 1, 0, 0, 2, 1) :
-					ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, 0.0f, -0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 2, 1);
+					ATTACH_ENTITY_TO_ENTITY(ped, vehicle.GetHandle(), -1, 0.0f, -0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0, 0, 0, 0, 2, 1, 0);
 					REQUEST_ANIM_DICT("mini@prostitutes@sexnorm_veh");
 					WAIT(50);
 					TASK_PLAY_ANIM(ped, "mini@prostitutes@sexnorm_veh", "bj_loop_male", 8.f, 0.f, -1, 9, 0, 0, 0, 0);
@@ -94,8 +94,8 @@ namespace sub
 					vehicle.SetVisible(false);
 					for (int i = -1; i <= ((int)(GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle.Handle())) - 2); i++)
 					{
-						if (IS_VEHICLE_SEAT_FREE(vehicle.Handle(), i)) continue;
-						sped.Handle() = GET_PED_IN_VEHICLE_SEAT(vehicle.Handle(), i);
+						if (IS_VEHICLE_SEAT_FREE(vehicle.Handle(), i, 0)) continue;
+						sped.Handle() = GET_PED_IN_VEHICLE_SEAT(vehicle.Handle(), i, 0);
 						sped.RequestControl();
 						sped.SetVisible(true);
 					}
@@ -116,7 +116,7 @@ namespace sub
 		{
 			model.Load(3000);
 
-			GTAvehicle veh = CREATE_VEHICLE(model.hash, 0.0f, 0.0f, 0.0f, 0.0f, 1, 1);
+			GTAvehicle veh = CREATE_VEHICLE(model.hash, 0.0f, 0.0f, 0.0f, 0.0f, 1, 1, 0);
 			veh.LodDistance_set(1000000);
 
 			GTAped sped;
@@ -131,8 +131,8 @@ namespace sub
 					vehicle.SetVisible(false);
 					for (int i = -1; i <= ((int)(GET_VEHICLE_MAX_NUMBER_OF_PASSENGERS(vehicle.Handle())) - 2); i++)
 					{
-						if (IS_VEHICLE_SEAT_FREE(vehicle.Handle(), i)) continue;
-						sped.Handle() = GET_PED_IN_VEHICLE_SEAT(vehicle.Handle(), i);
+						if (IS_VEHICLE_SEAT_FREE(vehicle.Handle(), i, 0)) continue;
+						sped.Handle() = GET_PED_IN_VEHICLE_SEAT(vehicle.Handle(), i, 0);
 						sped.RequestControl();
 						sped.SetVisible(true);
 					}
@@ -605,7 +605,7 @@ namespace sub
 			Yaw = 0.0000;
 			att_obj_to_veh(tempHash, tempVehicle, X, Y, Z, Pitch, Roll, Yaw, 1);
 
-			SET_ENTITY_VISIBLE(tempVehicle, true);
+			SET_ENTITY_VISIBLE(tempVehicle, true, false);
 			SET_ENTITY_ALPHA(tempVehicle, 0, 0);
 			//SET_VEHICLE_AS_NO_LONGER_NEEDED(&tempVehicle);
 
@@ -832,8 +832,8 @@ namespace sub
 			auto bone_chassis = vehicle.GetBoneIndex(VBone::chassis_dummy);
 
 			Model building = 0xAC4365DD; // dt1_05_build1_damage
-			ModelDimensions& buildingDim = building.Dimensions();
-			ModelDimensions& vehicleDim = vehicle.ModelDimensions();
+			const ModelDimensions& buildingDim = building.Dimensions();
+			const ModelDimensions& vehicleDim = vehicle.ModelDimensions();
 
 			att_obj_to_veh(building, vehicle, 0, 0, vehicleDim.Dim1.z - buildingDim.Dim2.z, 0, 0, 0, 1, bone_chassis, false, true, false); // Don't set as no longer needed
 

@@ -34,8 +34,8 @@ namespace sub
 		class GhostRiderMode final : public GenericLoopedMode
 		{
 		private:
-			const PCHAR freakOut_dict;// = "ANIM@MP_PLAYER_INTUPPERFREAKOUT";
-			const PCHAR freakOut_name;// = "EXIT_FP";
+			std::string freakOut_dict;// = "ANIM@MP_PLAYER_INTUPPERFREAKOUT";
+			std::string freakOut_name;// = "EXIT_FP";
 			GTAped playerPed;
 			GTAvehicle playerVehicle;
 			//bool justEnteredVehicle = false;
@@ -145,7 +145,7 @@ namespace sub
 				if (playerPed.IsInVehicle())
 				{
 					playerVehicle = playerPed.CurrentVehicle();
-					auto& playerVehicleModel = playerVehicle.Model();
+					const auto& playerVehicleModel = playerVehicle.Model();
 					playerVehicle.SetFireProof(true);
 
 					//if (!justEnteredVehicle)
@@ -156,7 +156,7 @@ namespace sub
 					//	transformSound.Play(playerVehicle);
 					//	playerVehicle.PrimaryColour_set(COLOR_UTIL_BLACK);
 					//	playerVehicle.DirtLevel_set(0.0f);
-					//	_SET_VEHICLE_PAINT_FADE(playerVehicle.Handle(), 0.1f);
+					//	SET_VEHICLE_ENVEFF_SCALE(playerVehicle.Handle(), 0.1f);
 					//}
 
 					if (playerVehicleModel.IsBicycle() || playerVehicleModel.IsBike())

@@ -188,7 +188,7 @@ namespace sub
 			std::string& _dir = dict3;
 
 			GTAentity myPed = PLAYER_PED_ID();
-			Vector3& myPos = myPed.Position_get();
+			const Vector3& myPos = myPed.Position_get();
 			auto& fSaveRangeRadius = _fSaveRangeRadius;
 
 			AddTitle("Manage Saved Files");
@@ -334,7 +334,7 @@ namespace sub
 				bool bSearchPressed = false;
 				AddOption(_searchStr.empty() ? "SEARCH" : _searchStr, bSearchPressed, nullFunc, -1, true); if (bSearchPressed)
 				{
-					_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+					_searchStr = Game::InputBox(_searchStr, 126U, "SEARCH", boost::to_lower_copy(_searchStr));
 					boost::to_upper(_searchStr);
 					//OnscreenKeyboard::State::Set(OnscreenKeyboard::Purpose::SearchToUpper, _searchStr, 126U, std::string(), _searchStr);
 					//OnscreenKeyboard::State::arg1._ptr = reinterpret_cast<void*>(&_searchStr);
@@ -400,7 +400,7 @@ namespace sub
 			bool bSearchPressed = false;
 			AddOption(_searchStr.empty() ? "SEARCH" : _searchStr, bSearchPressed, nullFunc, -1, true); if (bSearchPressed)
 			{
-			_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+			_searchStr = Game::InputBox(_searchStr, 126U, "SEARCH", boost::to_lower_copy(_searchStr));
 			boost::to_upper(_searchStr);
 			//OnscreenKeyboard::State::Set(OnscreenKeyboard::Purpose::SearchToUpper, _searchStr, 126U, std::string(), _searchStr);
 			//OnscreenKeyboard::State::arg1._ptr = reinterpret_cast<void*>(&_searchStr);
@@ -425,7 +425,7 @@ namespace sub
 		{
 			std::string& _name = dict;
 			std::string& _dir = dict3;
-			std::string& filePath = _dir + "\\" + _name + ".xml";
+			std::string filePath = _dir + "\\" + _name + ".xml";
 
 			AddTitle(_name);
 
@@ -503,9 +503,9 @@ namespace sub
 			if (doc.load_file((const char*)filePath.c_str()).status == pugi::status_ok)
 			{
 				AddBreak("---Attributes---");
-				auto& nodeRoot = doc.child("SpoonerPlacements"); // Root
+				auto nodeRoot = doc.child("SpoonerPlacements"); // Root
 
-				auto& nodeNote = nodeRoot.child("Note");
+				auto nodeNote = nodeRoot.child("Note");
 				if (nodeNote)
 				{
 					std::string noteStr = nodeNote.text().as_string();
@@ -524,7 +524,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeAudioFile = nodeRoot.child("AudioFile");
+				auto nodeAudioFile = nodeRoot.child("AudioFile");
 				if (nodeAudioFile)
 				{
 					std::string audioFileName = nodeAudioFile.text().as_string();
@@ -543,7 +543,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeStartTaskSeqOnLoad = nodeRoot.child("StartTaskSequencesOnLoad");
+				auto nodeStartTaskSeqOnLoad = nodeRoot.child("StartTaskSequencesOnLoad");
 				if (nodeStartTaskSeqOnLoad)
 				{
 					bool bToggleStartTaskSeqOnLoadPressed = false;
@@ -554,7 +554,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeClearDatabase = nodeRoot.child("ClearDatabase");
+				auto nodeClearDatabase = nodeRoot.child("ClearDatabase");
 				if (nodeClearDatabase)
 				{
 					bool bToggleClearDatabasePressed = false;
@@ -565,7 +565,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeClearMarkers = nodeRoot.child("ClearMarkers");
+				auto nodeClearMarkers = nodeRoot.child("ClearMarkers");
 				if (nodeClearMarkers)
 				{
 					bool bToggleClearMarkersPressed = false;
@@ -577,8 +577,8 @@ namespace sub
 				}
 
 				Vector3 refCoords, imgLoadingCoords;
-				auto& nodeReferenceCoords = nodeRoot.child("ReferenceCoords");
-				auto& nodeImgLoadingCoords = nodeRoot.child("ImgLoadingCoords");
+				auto nodeReferenceCoords = nodeRoot.child("ReferenceCoords");
+				auto nodeImgLoadingCoords = nodeRoot.child("ImgLoadingCoords");
 				for (auto& nas : std::vector<std::pair<Vector3*, pugi::xml_node*>>
 					{
 						{ &refCoords, &nodeReferenceCoords },
@@ -601,7 +601,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeClearWorld = nodeRoot.child("ClearWorld");
+				auto nodeClearWorld = nodeRoot.child("ClearWorld");
 				if (nodeClearDatabase && nodeReferenceCoords)
 				{
 					float clearWorldRadius = nodeClearWorld.text().as_float();
@@ -629,7 +629,7 @@ namespace sub
 						bool bSetPosToMe = false;
 						AddOption("Set To Player Position", bSetPosToMe); if (bSetPosToMe)
 						{
-							Vector3& myPos = GTAentity(PLAYER_PED_ID()).Position_get();
+							Vector3 myPos = GTAentity(PLAYER_PED_ID()).Position_get();
 							*std::get<1>(nas) = myPos;
 							if (!xNode)
 							{
@@ -649,7 +649,7 @@ namespace sub
 						bool bSetPosToHitCoords = false;
 						AddOption("Set To Camera Target", bSetPosToHitCoords); if (bSetPosToHitCoords)
 						{
-							Vector3& hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
+							Vector3 hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
 							*std::get<1>(nas) = hitCoords;
 							if (!xNode)
 							{
@@ -670,7 +670,7 @@ namespace sub
 						AddOption("Set To Waypoint", bSetPosToWp); if (bSetPosToWp)
 						{
 							GTAblip wpBlip = GET_FIRST_BLIP_INFO_ID(BlipIcon::Waypoint);
-							Vector3& wpCoords = wpBlip.Position_get();
+							Vector3 wpCoords = wpBlip.Position_get();
 							wpCoords.z = World::GetGroundHeight(wpCoords);
 							*std::get<1>(nas) = wpCoords;
 							if (!xNode)
@@ -688,7 +688,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeTimecycMod = nodeRoot.child("TimecycleModifier");
+				auto nodeTimecycMod = nodeRoot.child("TimecycleModifier");
 				if (nodeTimecycMod)
 				{
 					AddBreak("Vision Hax");
@@ -776,7 +776,7 @@ namespace sub
 					}
 				}
 
-				auto& nodeWeatherToSet = nodeRoot.child("WeatherToSet");
+				auto nodeWeatherToSet = nodeRoot.child("WeatherToSet");
 				if (nodeWeatherToSet)
 				{
 					AddBreak("Weather To Set");
@@ -811,7 +811,7 @@ namespace sub
 		{
 			std::string& _name = dict;
 			std::string& _dir = dict3;
-			std::string& filePath = _dir + "\\" + _name + ".SP00N";
+			std::string filePath = _dir + "\\" + _name + ".SP00N";
 
 			AddTitle(_name);
 
@@ -914,7 +914,8 @@ namespace sub
 					bool bEntityExists = e.Handle.Exists();
 					bool bEntityPressed = false;
 
-					AddOption((*Menu::currentopATM == Menu::printingop + 1 ? "~bold~[" + e.TypeName() + "]~bold~  " : std::string()) + e.HashName + (bEntityExists ? "" : " (Invalid)"), bEntityPressed); if (bEntityPressed)
+					const std::string& strEntTypeConcat = (*Menu::currentopATM == Menu::printingop + 1 ? "  ~bold~[" + e.TypeName() + "]~bold~" : std::string());
+					AddOption(e.HashName + (bEntityExists ? "" : " (Invalid)") + strEntTypeConcat, bEntityPressed); if (bEntityPressed)
 					{
 						if (bEntityExists)
 						{
@@ -1106,7 +1107,7 @@ namespace sub
 			if (bCopy_minus) { if (_copyEntTexterValue > 0) _copyEntTexterValue--; }
 			if (bCopyPressed)
 			{
-				SpoonerEntity& copiedEntity = EntityManagement::CopyEntity(SelectedEntity, isThisEntityInDb, true, _copyEntTexterValue);
+				const SpoonerEntity& copiedEntity = EntityManagement::CopyEntity(SelectedEntity, isThisEntityInDb, true, _copyEntTexterValue);
 				//EntityManagement::AddEntityToDb(copiedEntity);
 				SelectedEntity = copiedEntity;
 			}
@@ -1143,8 +1144,8 @@ namespace sub
 				auto& thisTextureVariation = SelectedEntity.TextureVariation;
 				bool bTextureVariation_plus = false, bTextureVariation_minus = false;
 				AddNumber("Texture Variation", thisTextureVariation, 0, null, bTextureVariation_plus, bTextureVariation_minus);
-				if (bTextureVariation_plus) { if (thisTextureVariation < UINT8_MAX) { thisTextureVariation++; _0x971DA0055324D033(SelectedEntity.Handle.Handle(), thisTextureVariation); } }
-				if (bTextureVariation_minus) { if (thisTextureVariation > 0) { thisTextureVariation--; _0x971DA0055324D033(SelectedEntity.Handle.Handle(), thisTextureVariation); } }
+				if (bTextureVariation_plus) { if (thisTextureVariation < UINT8_MAX) { thisTextureVariation++; SET_OBJECT_TINT_INDEX(SelectedEntity.Handle.Handle(), thisTextureVariation); } }
+				if (bTextureVariation_minus) { if (thisTextureVariation > 0) { thisTextureVariation--; SET_OBJECT_TINT_INDEX(SelectedEntity.Handle.Handle(), thisTextureVariation); } }
 			}
 
 			int thisHealth = SelectedEntity.Handle.Health_get();
@@ -1659,8 +1660,8 @@ namespace sub
 			SelectedEntity.Handle.RequestControlOnce();
 
 			GTAped thisPed = SelectedEntity.Handle;
-			Vector3& currPos = SelectedEntity.Handle.Position_get();
-			Vector3& currRot = SelectedEntity.Handle.Rotation_get();
+			Vector3 currPos = SelectedEntity.Handle.Position_get();
+			Vector3 currRot = SelectedEntity.Handle.Rotation_get();
 			Vector3 nextPos = currPos;
 			Vector3 nextRot = currRot;
 
@@ -1803,8 +1804,8 @@ namespace sub
 
 			SelectedEntity.Handle.RequestControlOnce();
 
-			Vector3& currPos = SelectedEntity.Handle.Position_get();
-			Vector3& currRot = SelectedEntity.Handle.Rotation_get();
+			Vector3 currPos = SelectedEntity.Handle.Position_get();
+			Vector3 currRot = SelectedEntity.Handle.Rotation_get();
 			Vector3 nextPos = currPos;
 			Vector3 nextRot = currRot;
 
@@ -1940,8 +1941,8 @@ namespace sub
 				AddBreak("---Place---");
 
 				bool isOnTheLine = NETWORK_IS_IN_SESSION() != 0;
-				Vector3& refPos = refEnt.Handle.Position_get();
-				Vector3& refRot = refEnt.Handle.Rotation_get();
+				Vector3 refPos = refEnt.Handle.Position_get();
+				Vector3 refRot = refEnt.Handle.Rotation_get();
 				Vector3 nextPosOffset;
 				Vector3 nextRotOffset;
 
@@ -2064,7 +2065,7 @@ namespace sub
 				{
 					for (auto& e : vGroup)
 					{
-						SpoonerEntity& copiedEntity = EntityManagement::CopyEntity(e, true, true, _copyEntTexterValue);
+						const SpoonerEntity& copiedEntity = EntityManagement::CopyEntity(e, true, true, _copyEntTexterValue);
 						//EntityManagement::AddEntityToDb(copiedEntity);
 						//e = copiedEntity;
 					}
@@ -2235,7 +2236,7 @@ namespace sub
 			bool butAmIOnline = NETWORK_IS_IN_SESSION() != 0;
 			bool isPedMyPed = thisPed.Handle() == myPed.Handle();
 			bool bIsPedShortHeighted = GET_PED_CONFIG_FLAG(thisPed.Handle(), 223, false) != 0;
-			PedGroup& myPedGroup = myPed.CurrentPedGroup_get();
+			PedGroup myPedGroup = myPed.CurrentPedGroup_get();
 
 			bool pedops_isStill_toggle = false,
 				pedops_canRagdoll_toggle = false,
@@ -2378,7 +2379,7 @@ namespace sub
 
 			if (pedops_warp_nearest)
 			{
-				auto& closestVeh = World::GetClosestVehicle(thisPed.Position_get(), 100.0f);
+				const auto& closestVeh = World::GetClosestVehicle(thisPed.Position_get(), 100.0f);
 				if (closestVeh.Exists())
 					thisPed.SetIntoVehicle(closestVeh, closestVeh.FirstFreeSeat(SEAT_DRIVER));
 				else
@@ -2390,7 +2391,7 @@ namespace sub
 				if (!IS_WAYPOINT_ACTIVE()) Game::Print::PrintBottomCentre("~r~Error:~s~ No Waypoint Set.");
 				else
 				{
-					Vector3& coord = GET_BLIP_INFO_ID_COORD(GET_FIRST_BLIP_INFO_ID(BlipIcon::Waypoint));
+					Vector3 coord = GET_BLIP_INFO_ID_COORD(GET_FIRST_BLIP_INFO_ID(BlipIcon::Waypoint));
 					coord.z = World::GetGroundHeight(coord);
 					//thisPed.Task().GoTo(coord);
 					TASK_GO_TO_COORD_ANY_MEANS(thisPed.Handle(), coord.x, coord.y, coord.z, 3.0f, 0, 0, 786603, -1082130432);
@@ -2428,7 +2429,7 @@ namespace sub
 				GIVE_WEAPON_TO_PED(thisPed.Handle(), weaponHash, 1, true, false);
 				int ammo;
 				GET_MAX_AMMO(thisPed.Handle(), weaponHash, &ammo);
-				SET_PED_AMMO(thisPed.Handle(), weaponHash, ammo);
+				SET_PED_AMMO(thisPed.Handle(), weaponHash, ammo, 0);
 				SET_AMMO_IN_CLIP(thisPed.Handle(), weaponHash, GET_MAX_AMMO_IN_CLIP(thisPed.Handle(), weaponHash, true));
 				SET_CURRENT_PED_WEAPON(thisPed.Handle(), weaponHash, true);
 			}
@@ -2459,7 +2460,7 @@ namespace sub
 					GIVE_WEAPON_TO_PED(thisPed.Handle(), wc.weaponHash, 1, true, false);
 					int ammo;
 					GET_MAX_AMMO(thisPed.Handle(), wc.weaponHash, &ammo);
-					SET_PED_AMMO(thisPed.Handle(), wc.weaponHash, ammo);
+					SET_PED_AMMO(thisPed.Handle(), wc.weaponHash, ammo, 0);
 					SET_AMMO_IN_CLIP(thisPed.Handle(), wc.weaponHash, GET_MAX_AMMO_IN_CLIP(thisPed.Handle(), wc.weaponHash, true));
 					SET_CURRENT_PED_WEAPON(thisPed.Handle(), wc.weaponHash, true);
 				}
@@ -2517,12 +2518,12 @@ namespace sub
 				if (!spoocam.IsActive())
 				{
 					GTAentity myPed = PLAYER_PED_ID();
-					Vector3& myPos = myPed.Position_get();
+					Vector3 myPos = myPed.Position_get();
 					SelectedMarker = MarkerManagement::AddMarker(myPos, Vector3(0, 0, myPed.Heading_get()));
 				}
 				else
 				{
-					Vector3& spawnPos = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 120.0f, 30.0f + SpoonerMarker().m_scale / 2);
+					Vector3 spawnPos = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 120.0f, 30.0f + SpoonerMarker().m_scale / 2);
 					spawnPos.z += SpoonerMarker().m_scale / 2;
 					SelectedMarker = MarkerManagement::AddMarker(spawnPos, Vector3(0, 0, spoocam.Rotation_get().z));
 				}
@@ -2543,7 +2544,7 @@ namespace sub
 		{
 			auto& fMarkerRemovalRadius = _fSaveRangeRadius;
 			GTAentity myPed = PLAYER_PED_ID();
-			Vector3& myPos = myPed.Position_get();
+			const Vector3& myPos = myPed.Position_get();
 
 			AddTitle("Removal");
 
@@ -2601,7 +2602,7 @@ namespace sub
 				World::DrawLine(finalPosition, finalDest, RGBA(SelectedMarker->m_colour, 200));
 				World::DrawLightWithRange(finalDest, RgbS(SelectedMarker->m_colour), 2.3f, 1.5f);
 
-				Vector3& helpingSpherePos = finalDest.PointOnCircle(1.16f, finalDestHeading + 90.0f);
+				const Vector3& helpingSpherePos = finalDest.PointOnCircle(1.16f, finalDestHeading + 90.0f);
 				World::DrawLine(finalDest, helpingSpherePos, RGBA(SelectedMarker->m_colour, 200));
 				World::DrawMarker(MarkerType::DebugSphere, helpingSpherePos, Vector3(), Vector3(), Vector3(0.1f, 0.1f, 0.1f), RGBA(SelectedMarker->m_colour, 200));
 			}
@@ -2646,7 +2647,7 @@ namespace sub
 					bool bSetPosToMe = false;
 					AddOption("Set To Player Position", bSetPosToMe); if (bSetPosToMe)
 					{
-						Vector3& myPos = GTAentity(PLAYER_PED_ID()).Position_get();
+						Vector3 myPos = GTAentity(PLAYER_PED_ID()).Position_get();
 						SelectedMarker->m_position = myPos;
 						SelectedMarker->m_attachmentArgs.attachedTo = 0;
 					}
@@ -2656,7 +2657,7 @@ namespace sub
 					bool bSetPosToHitCoords = false;
 					AddOption("Set To Camera Target", bSetPosToHitCoords); if (bSetPosToHitCoords)
 					{
-						Vector3& hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
+						Vector3 hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
 						SelectedMarker->m_position = hitCoords;
 						SelectedMarker->m_attachmentArgs.attachedTo = 0;
 					}
@@ -2667,7 +2668,7 @@ namespace sub
 					AddOption("Set To Waypoint", bSetPosToWp); if (bSetPosToWp)
 					{
 						GTAblip wpBlip = GET_FIRST_BLIP_INFO_ID(BlipIcon::Waypoint);
-						Vector3& wpCoords = wpBlip.Position_get();
+						Vector3 wpCoords = wpBlip.Position_get();
 						wpCoords.z = World::GetGroundHeight(wpCoords);
 						SelectedMarker->m_position = wpCoords;
 						SelectedMarker->m_attachmentArgs.attachedTo = 0;
@@ -2714,7 +2715,7 @@ namespace sub
 					bool bSetPosToMe = false;
 					AddOption("Set To Player Position", bSetPosToMe); if (bSetPosToMe)
 					{
-						Vector3& myPos = GTAentity(PLAYER_PED_ID()).Position_get();
+						Vector3 myPos = GTAentity(PLAYER_PED_ID()).Position_get();
 						SelectedMarker->m_destinationVal.m_position = myPos;
 						SelectedMarker->m_destinationVal.m_attachmentArgs.attachedTo = 0;
 						SelectedMarker->m_destinationPtr = nullptr;
@@ -2725,7 +2726,7 @@ namespace sub
 					bool bSetPosToHitCoords = false;
 					AddOption("Set To Camera Target", bSetPosToHitCoords); if (bSetPosToHitCoords)
 					{
-						Vector3& hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
+						Vector3 hitCoords = spoocam.RaycastForCoord(Vector2(0.0f, 0.0f), 0, 160.0f, 3.0f);
 						SelectedMarker->m_destinationVal.m_position = hitCoords;
 						SelectedMarker->m_destinationVal.m_attachmentArgs.attachedTo = 0;
 						SelectedMarker->m_destinationPtr = nullptr;
@@ -2737,7 +2738,7 @@ namespace sub
 					AddOption("Set To Waypoint", bSetPosToWp); if (bSetPosToWp)
 					{
 						GTAblip wpBlip = GET_FIRST_BLIP_INFO_ID(BlipIcon::Waypoint);
-						Vector3& wpCoords = wpBlip.Position_get();
+						Vector3 wpCoords = wpBlip.Position_get();
 						wpCoords.z = World::GetGroundHeight(wpCoords);
 						SelectedMarker->m_destinationVal.m_position = wpCoords;
 						SelectedMarker->m_destinationVal.m_attachmentArgs.attachedTo = 0;
@@ -2930,7 +2931,7 @@ namespace sub
 			bool bSearchPressed = false;
 			AddOption(_searchStr.empty() ? "SEARCH" : boost::to_upper_copy(_searchStr), bSearchPressed, nullFunc, -1, true); if (bSearchPressed)
 			{
-				_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+				_searchStr = Game::InputBox(_searchStr, 126U, "SEARCH", _searchStr);
 				boost::to_lower(_searchStr);
 				//OnscreenKeyboard::State::Set(OnscreenKeyboard::Purpose::SearchToLower, _searchStr, 126U, std::string(), _searchStr);
 				//OnscreenKeyboard::State::arg1._ptr = reinterpret_cast<void*>(&_searchStr);
@@ -2985,10 +2986,10 @@ namespace sub
 			if (doc.load_file((const char*)(GetPathffA(Pathff::Main, true) + xmlFavouriteProps).c_str()).status != pugi::status_ok)
 			{
 				doc.reset();
-				auto& nodeDecleration = doc.append_child(pugi::node_declaration);
+				auto nodeDecleration = doc.append_child(pugi::node_declaration);
 				nodeDecleration.append_attribute("version") = "1.0";
 				nodeDecleration.append_attribute("encoding") = "ISO-8859-1";
-				auto& nodeRoot = doc.append_child("FavouriteProps");
+				auto nodeRoot = doc.append_child("FavouriteProps");
 				doc.save_file((const char*)(GetPathffA(Pathff::Main, true) + xmlFavouriteProps).c_str());
 				return;
 			}
@@ -3014,7 +3015,7 @@ namespace sub
 			{
 				AddBreak("---Added Object Models---");
 
-				for (auto& nodeLocToLoad = nodeRoot.first_child(); nodeLocToLoad; nodeLocToLoad = nodeLocToLoad.next_sibling())
+				for (auto nodeLocToLoad = nodeRoot.first_child(); nodeLocToLoad; nodeLocToLoad = nodeLocToLoad.next_sibling())
 				{
 					const std::string& modelName = nodeLocToLoad.attribute("modelName").as_string();
 					Model model = nodeLocToLoad.attribute("modelHash").as_uint(0);
@@ -3064,7 +3065,7 @@ namespace sub
 			bool bSearchPressed = false;
 			AddOption(_searchStr.empty() ? "SEARCH" : boost::to_upper_copy(_searchStr), bSearchPressed, nullFunc, -1, true); if (bSearchPressed)
 			{
-				_searchStr = Game::InputBox(_searchStr, 126U, "", _searchStr);
+				_searchStr = Game::InputBox(_searchStr, 126U, "SEARCH", _searchStr);
 				boost::to_lower(_searchStr);
 				//OnscreenKeyboard::State::Set(OnscreenKeyboard::Purpose::SearchToLower, _searchStr, 126U, std::string(), _searchStr);
 				//OnscreenKeyboard::State::arg1._ptr = reinterpret_cast<void*>(&_searchStr);
@@ -3263,8 +3264,8 @@ namespace sub
 		AddOption("Taze Ped", bTaze_pressed); if (bTaze_pressed)
 		{
 			auto& ped = thisPed;
-			Vector3& startPos = ped.GetOffsetInWorldCoords(0.5f, 2.8f, 1.0f);
-			Vector3& targPos = ped.Position_get(); //GET_PED_BONE_COORDS(ped.Handle(), Bone::Chest, 0, 0, 0);
+			Vector3 startPos = ped.GetOffsetInWorldCoords(0.5f, 2.8f, 1.0f);
+			Vector3 targPos = ped.Position_get(); //GET_PED_BONE_COORDS(ped.Handle(), Bone::Chest, 0, 0, 0);
 			 //ped.RequestControl();
 			CLEAR_AREA_OF_PROJECTILES(startPos.x, startPos.y, startPos.z, 4.0f, 0);
 			World::ShootBullet(startPos, targPos, 0, WEAPON_STUNGUN, 5, 2000.0f, false, true);
@@ -3360,7 +3361,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3377,7 +3378,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3394,7 +3395,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3411,7 +3412,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			//tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3428,7 +3429,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3445,7 +3446,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3462,7 +3463,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3479,7 +3480,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3496,7 +3497,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3513,7 +3514,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3530,7 +3531,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3547,7 +3548,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3564,7 +3565,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3581,7 +3582,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3598,7 +3599,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3615,7 +3616,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			tempBone = Bone::LeftHand;
 			att_x = -0.05f;
@@ -3627,7 +3628,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			SET_MODEL_AS_NO_LONGER_NEEDED(tempHash);
 			return;
@@ -3645,7 +3646,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			tempHash = 3803840879;
 			tempBone = 60309;
@@ -3658,7 +3659,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3677,7 +3678,7 @@ namespace sub
 				Model(tempHash).Load(2000);
 				tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 				int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-				ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+				ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 				SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			}
 			return;
@@ -3695,7 +3696,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3712,7 +3713,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3729,7 +3730,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3746,7 +3747,7 @@ namespace sub
 			Model(tempHash).Load(2000);
 			tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 			int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+			ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 			SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			return;
 		}
@@ -3765,7 +3766,7 @@ namespace sub
 				Model(tempHash).Load(2000);
 				tempBone = GET_PED_BONE_INDEX(Static_241, tempBone);
 				int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-				ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z - 0.26f, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+				ATTACH_ENTITY_TO_ENTITY(tempObject, Static_241, tempBone, att_x, att_y, att_z - 0.26f, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 				SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 			}
 			return;
@@ -3791,7 +3792,7 @@ namespace sub
 					if (Model(tempHash).Load(2000))
 					{
 						int tempObject = CREATE_OBJECT(tempHash, 0.0f, 0.0f, 0.0f, 1, 1, 0);
-						ATTACH_ENTITY_TO_ENTITY(tempObject, tempEntity, 0, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1);
+						ATTACH_ENTITY_TO_ENTITY(tempObject, tempEntity, 0, att_x, att_y, att_z, att_rx, att_ry, att_rz, 1, 1, 0, 0, 2, 1, 0);
 						SET_OBJECT_AS_NO_LONGER_NEEDED(&tempObject);
 					}
 				}

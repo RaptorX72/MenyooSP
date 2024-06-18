@@ -18,6 +18,7 @@
 #include <vector>
 //#include <array>
 #include <string>
+#include <functional>
 
 typedef int INT, BOOL;
 typedef signed char INT8;
@@ -91,6 +92,7 @@ extern RGBA _globalPedTrackers_Col;
 
 extern std::pair<UINT16, UINT16> menubindsGamepad;
 extern UINT16 menubinds;
+extern UINT16 respawnbinds;
 
 class MenuInput final
 {
@@ -152,6 +154,7 @@ public:
 	static bool bit_controller, bit_mouse, bit_centre_title, bit_centre_options, bit_centre_breaks, gradients, thin_line_over_screct, bit_glare_test;
 	static Scaleform scaleform_menuGlare, instructional_buttons;
 	static std::vector<Scaleform_IbT> vIB;
+	static std::function<void()> OnSubBack;
 
 
 	static inline void Tick()
@@ -187,7 +190,7 @@ public:
 	static void glare_test();
 
 	static void set_opened_IB();
-	static void add_IB(ControllerInputs button_id, std::string string_val);
+	static void add_IB(ControllerInput button_id, std::string string_val);
 	static void add_IB(VirtualKey::VirtualKey button_id, std::string string_val);
 	static void add_IB(ScaleformButton button_id, std::string string_val);
 	static std::string get_key_IB(const Scaleform_IbT& ib);
@@ -229,7 +232,7 @@ enum class TICKOL : UINT8
 	PERCENTAGESTICKER,
 };
 
-void AddTitle(const std::string& text);
+void AddTitle(std::string text);
 void AddOption(std::string text, bool &option_code_bool = null, void(&callback)() = nullFunc, int submenu_index = -1, bool show_arrow = 0, bool gxt = 0);
 inline void AddOption(std::ostream& os, bool &option_code_bool = null, void(&callback)() = nullFunc, int submenu_index = -1, bool show_arrow = 0, bool gxt = 0);
 void OptionStatus(BOOL status);
@@ -237,9 +240,9 @@ void AddToggle(const std::string& text, bool &loop_variable, bool &extra_option_
 void AddToggle(const std::string& text, bool &loop_variable, void(&callback_ON)(), void(&callback_OFF)(), bool gxt = 0);
 void AddLocal(const std::string& text, BOOL condition, bool &option_code_ON, bool &option_code_OFF, bool gxt = 0);
 void AddLocal(const std::string& text, BOOL condition, void(&callback_ON)(), void(&callback_OFF)(), bool gxt = 0);
-void AddBreak(const std::string& text);
+void AddBreak(std::string text);
 void AddNumber(const std::string& text, float value, __int8 decimal_places, bool &A_PRESS = null, bool &RIGHT_PRESS = null, bool &LEFT_PRESS = null, bool gxt = 0);
-void draw_tickol_tick_BNW(const PCHAR textureDict, const PCHAR normal, const PCHAR selected, const RGBA& colour);
+void draw_tickol_tick_BNW(const std::string& textureDict, const std::string& normal, const std::string& selected, const RGBA& colour);
 inline void draw_tickol_tick(TICKOL tickType);
 void AddTickol(const std::string& text, BOOL condition, bool &option_code_ON, bool &option_code_OFF, TICKOL tickTrue = TICKOL::TICK, TICKOL tickFalse = TICKOL::NONE, bool gxt = false);
 void AddTickol(const std::string& text, BOOL condition, void(&callback_ON)(), void(&callback_OFF)(), TICKOL tickTrue = TICKOL::TICK, TICKOL tickFalse = TICKOL::NONE, bool gxt = false);

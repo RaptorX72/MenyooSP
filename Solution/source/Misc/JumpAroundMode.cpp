@@ -40,7 +40,7 @@ namespace _JumpAroundMode_
 	inline void DrawDiscoLights()
 	{
 		GTAped myPed = PLAYER_PED_ID();
-		Vector3& myPos = myPed.Position_get();
+		Vector3 myPos = myPed.Position_get();
 		int i;
 
 		DiscoLight* dlight;
@@ -51,7 +51,7 @@ namespace _JumpAroundMode_
 			dlight->angle += 0.0001f;
 			if (dlight->angle > 360.0f) dlight->angle = 0.0f;
 
-			Vector3& lightPos = myPos.PointOnCircle(240.0f, dlight->angle);
+			Vector3 lightPos = myPos.PointOnCircle(240.0f, dlight->angle);
 
 			ray = RaycastResult::Raycast(myPos + Vector3(0, 0, 2.0f), lightPos, IntersectOptions::Everything);
 			if (ray.DidHitAnything())
@@ -73,7 +73,7 @@ namespace _JumpAroundMode_
 			if (IS_ENTITY_ATTACHED(ped) || !IS_PED_ON_FOOT(ped) || IS_ENTITY_IN_AIR(ped))
 				continue;
 			NETWORK_REQUEST_CONTROL_OF_ENTITY(ped);
-			TASK_JUMP(ped, true);
+			TASK_JUMP(ped, true, false, false);
 			APPLY_FORCE_TO_ENTITY(ped, 1, 0, 0, jumpForce, 0, 0, 0, false, false, true, true, false, true);
 			STOP_PED_SPEAKING(ped, true);
 
@@ -94,15 +94,15 @@ namespace _JumpAroundMode_
 			if (vehicle == g_myVeh || IS_ENTITY_ATTACHED(vehicle))
 				continue;
 
-			Vector3& Pos = GET_ENTITY_COORDS(vehicle, 1);
+			Vector3 Pos = GET_ENTITY_COORDS(vehicle, 1);
 			//if (GET_GAME_TIMER() >= Menu::delayedTimer)
 			//{
 			//neonRGB = { GET_RANDOM_INT_IN_RANGE(0, 255), GET_RANDOM_INT_IN_RANGE(0, 255), GET_RANDOM_INT_IN_RANGE(0, 255) };
-			_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 0, true);
-			_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 1, true);
-			_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 2, true);
-			_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 3, true);
-			_SET_VEHICLE_NEON_LIGHTS_COLOUR(vehicle, neonRGB.R, neonRGB.G, neonRGB.B);
+			SET_VEHICLE_NEON_ENABLED(vehicle, 0, true);
+			SET_VEHICLE_NEON_ENABLED(vehicle, 1, true);
+			SET_VEHICLE_NEON_ENABLED(vehicle, 2, true);
+			SET_VEHICLE_NEON_ENABLED(vehicle, 3, true);
+			SET_VEHICLE_NEON_COLOUR(vehicle, neonRGB.R, neonRGB.G, neonRGB.B);
 			//}
 			DRAW_LIGHT_WITH_RANGE(Pos.x, Pos.y, Pos.z, neonRGB.R, neonRGB.G, neonRGB.B, 3.2f, 1.2f);
 
@@ -110,7 +110,7 @@ namespace _JumpAroundMode_
 			if (IS_VEHICLE_ON_ALL_WHEELS(vehicle))
 			{
 				NETWORK_REQUEST_CONTROL_OF_ENTITY(vehicle);
-				_SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 0, 1); _SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 1, 1); _SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 2, 1); _SET_VEHICLE_NEON_LIGHT_ENABLED(vehicle, 3, 1);
+				SET_VEHICLE_NEON_ENABLED(vehicle, 0, 1); SET_VEHICLE_NEON_ENABLED(vehicle, 1, 1); SET_VEHICLE_NEON_ENABLED(vehicle, 2, 1); SET_VEHICLE_NEON_ENABLED(vehicle, 3, 1);
 				APPLY_FORCE_TO_ENTITY(vehicle, 0, 0.0f, 0.0f, jumpForce, 0.0f, 0.0f, 0.0f, false, false, true, true, false, true); // 68.f
 			}
 
