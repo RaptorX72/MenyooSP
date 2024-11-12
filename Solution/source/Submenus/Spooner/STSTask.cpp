@@ -86,6 +86,8 @@ namespace sub::Spooner
 		{ STSTaskType::ChangeOpacity,{ "Change Opacity", EntityType::ALL } },
 		{ STSTaskType::TriggerFx,{ "TriggerFX", EntityType::ALL } },
 
+		{ STSTaskType::ChangePedAppearance,{ "ChangePedAppearance", EntityType::ALL } },
+
 		{ STSTaskType::SnapTasks,{ "Refresh (Snap & Stand)", EntityType::PED } },
 		{ STSTaskType::EndSequence,{ "End Sequence", EntityType::ALL } },
 	};

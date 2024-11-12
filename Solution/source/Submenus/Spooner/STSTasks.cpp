@@ -2012,6 +2012,61 @@ namespace sub::Spooner
 		{
 			timer = 0U;
 		}
+		
+		void ChangePedAppearance::GetXmlNodeTaskSpecific(pugi::xml_node& nodeTask) const
+		{
+			nodeTask.append_child("MainType").text() = this->mainType;
+			nodeTask.append_child("SubType").text() = this->subType;
+			nodeTask.append_child("Item").text() = this->item;
+			nodeTask.append_child("Texture").text() = this->texture;
+			nodeTask.append_child("Opacity").text() = this->opacity;
+			nodeTask.append_child("Color1").text() = this->color1;
+			nodeTask.append_child("Color2").text() = this->color2;
+		}
+
+		void ChangePedAppearance::ImportXmlNodeTaskSpecific(pugi::xml_node& nodeTask)
+		{
+			this->mainType = nodeTask.child("MainType").text().as_int();
+			this->subType = nodeTask.child("SubType").text().as_int();
+			this->item = nodeTask.child("Item").text().as_int();
+			this->texture = nodeTask.child("Texture").text().as_int();
+			this->opacity = nodeTask.child("Opacity").text().as_float();
+			this->color1 = nodeTask.child("Color1").text().as_int();
+			this->color2 = nodeTask.child("Color2").text().as_int();
+		}
+
+		void ChangePedAppearance::ImportTaskDataSpecific(STSTask* otherTsk)
+		{
+			auto otherTskT = otherTsk->GetTypeTask<STSTasks::ChangePedAppearance>();
+			this->mainType = otherTskT->mainType;
+			this->subType = otherTskT->subType;
+			this->item = otherTskT->item;
+			this->texture = otherTskT->texture;
+			this->opacity = otherTskT->opacity;
+			this->color1 = otherTskT->color1;
+			this->color2 = otherTskT->color2;
+		}
+
+		ChangePedAppearance::ChangePedAppearance()
+		{
+			this->type = STSTaskType::ChangePedAppearance;
+			this->submenu = Submenus::Sub_TaskSequence::ChangePedAppearance;
+			this->duration = -2; // No duration setting
+			this->durationAfterLife = -2; // No durationAfterLife setting
+			this->isLoopedTask = false;
+			this->mainType = 0;
+			this->subType = 0;
+			this->item = 0;
+			this->texture = 0;
+			this->texture = 0;
+			this->opacity = 1.0f;
+			this->color1 = 0;
+			this->color2 = 0;
+		}
+		void ChangePedAppearance::RunP(GTAped& ep)
+		{
+			ep.Task().ChangePedAppearance(this->mainType, this->subType, this->item, this->texture, this->opacity, this->color1, this->color2);
+		}
 
 		EndSequence::EndSequence()
 		{

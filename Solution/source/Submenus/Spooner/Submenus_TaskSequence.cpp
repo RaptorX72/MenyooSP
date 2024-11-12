@@ -41,6 +41,8 @@
 #include "..\..\Submenus\PedAnimation.h"
 #include "..\..\Submenus\PedSpeech.h"
 #include "..\..\Submenus\PtfxSubs.h"
+//#include "../PedComponentChanger.cpp"
+//using namespace sub::PedHeadFeatures_catind;
 
 namespace sub::Spooner
 {
@@ -51,6 +53,8 @@ namespace sub::Spooner
 
 		namespace Sub_TaskSequence
 		{
+
+
 			void Nothing()
 			{
 			}
@@ -1611,6 +1615,277 @@ namespace sub::Spooner
 						tskPtr->fx.EasyStart(thisEntity, tskPtr->scale, tskPtr->posOffset, tskPtr->rotOffset, tskPtr->colour);
 					}
 				}
+			}
+
+
+			/*	PV_COMP_HEAD = 0,
+	PV_COMP_BERD,
+	PV_COMP_HAIR,
+	PV_COMP_UPPR,
+	PV_COMP_LOWR,
+	PV_COMP_HAND,
+	PV_COMP_FEET,
+	PV_COMP_TEEF,
+	PV_COMP_ACCS,
+	PV_COMP_TASK,
+	PV_COMP_DECL,
+	PV_COMP_JBIB,
+	PV_COMP_MAX*/
+
+			std::vector<std::string> v_mainTypes{ "Shape & skin tone", "Head Overlays", "Wardrobe" };
+			std::vector<std::string> v_clothingSubTypes {
+				"Head",
+				"BERD",
+				"Hair",
+				"Torso",
+				"Legs",
+				"Hands",
+				"Feet",
+				"Teef",
+				"Accs",
+				"Task",
+				"Decl",
+				"Tops2 (Outer)",
+				"Max"
+			};
+
+			const std::vector<std::pair<std::string, std::vector<std::string>>> vCaptions_headOverlays
+			{
+				{ /*"Skin Rash"*/"FACE_F_SUND",{ "Uneven", "Sandpaper", "Patchy", "Rough", "Leathery", "Textured", "Coarse", "Rugged", "Creased", "Cracked", "Gritty" } },
+				{ /*"Beard"*/"FACE_F_BEARD",{ "HAIR_BEARD1", "HAIR_BEARD2", "HAIR_BEARD3", "HAIR_BEARD4", "HAIR_BEARD5", "HAIR_BEARD6", "HAIR_BEARD7", "HAIR_BEARD8", "HAIR_BEARD9", "HAIR_BEARD10", "HAIR_BEARD11", "HAIR_BEARD12", "HAIR_BEARD13", "HAIR_BEARD14", "HAIR_BEARD15", "HAIR_BEARD16", "HAIR_BEARD17", "HAIR_BEARD18", "HAIR_BEARD19" } }, // Beard HAIR_OPTION_0
+				{ /*"Eyebrows"*/"FACE_F_EYEBR",{ "CC_EYEBRW_0", "CC_EYEBRW_1", "CC_EYEBRW_2", "CC_EYEBRW_3", "CC_EYEBRW_4", "CC_EYEBRW_5", "CC_EYEBRW_6", "CC_EYEBRW_7", "CC_EYEBRW_8", "CC_EYEBRW_9", "CC_EYEBRW_10", "CC_EYEBRW_11", "CC_EYEBRW_12", "CC_EYEBRW_13", "CC_EYEBRW_14", "CC_EYEBRW_15", "CC_EYEBRW_16", "CC_EYEBRW_17", "CC_EYEBRW_18", "CC_EYEBRW_19", "CC_EYEBRW_20", "CC_EYEBRW_21", "CC_EYEBRW_22", "CC_EYEBRW_23", "CC_EYEBRW_24", "CC_EYEBRW_25", "CC_EYEBRW_26", "CC_EYEBRW_27", "CC_EYEBRW_28", "CC_EYEBRW_29", "CC_EYEBRW_30", "CC_EYEBRW_31", "CC_EYEBRW_32", "CC_EYEBRW_33" } },
+				{ /*"Wrinkles"*/"FACE_F_SKINA",{ "Crow's Feet", "First Signs", "Middle Aged", "Worry Lines", "Depression", "Distinguished", "Aged", "Weathered", "Wrinkled", "Sagging", "Tough Life", "Vintage", "Retired", "Junkie", "Geriatric" } },
+				{ /*"Makeup & Face Paint"*/"HAIR_OPTION_2",{ "CC_MKUP_0", "CC_MKUP_1", "CC_MKUP_2", "CC_MKUP_3", "CC_MKUP_4", "CC_MKUP_5", "CC_MKUP_6", "CC_MKUP_7", "CC_MKUP_8", "CC_MKUP_9", "CC_MKUP_10", "CC_MKUP_11", "CC_MKUP_12", "CC_MKUP_13", "CC_MKUP_14", "CC_MKUP_15", "CC_MKUP_16", "CC_MKUP_17", "CC_MKUP_18", "CC_MKUP_19", "CC_MKUP_20", "CC_MKUP_21", "CC_MKUP_22", "CC_MKUP_23", "CC_MKUP_24", "CC_MKUP_25", "CC_MKUP_26", "CC_MKUP_27", "CC_MKUP_28", "CC_MKUP_29", "CC_MKUP_30", "CC_MKUP_31", "CC_MKUP_32", "CC_MKUP_33", "CC_MKUP_34", "CC_MKUP_35", "CC_MKUP_36", "CC_MKUP_37", "CC_MKUP_38", "CC_MKUP_39", "CC_MKUP_40", "CC_MKUP_41" } }, // Makeup & face paint HAIR_OPTION_2
+				{ /*"Blush"*/"FACE_F_BLUSH",{ "CC_BLUSH_0", "CC_BLUSH_1", "CC_BLUSH_2", "CC_BLUSH_3", "CC_BLUSH_4", "CC_BLUSH_5", "CC_BLUSH_6" } },
+				{ /*"Pigment 1 - Complexion"*/"FACE_F_SKC",{ "Rosy Cheeks", "Stubble Rash", "Hot Flush", "Sunburn", "Bruised", "Alchoholic", "Patchy", "Totem", "Blood Vessels", "Damaged", "Pale", "Ghostly" } },
+				{ /*"Pigment 2 - Blemishes"*/"FACE_F_SKINB",{ "Measles", "Pimples", "Spots", "Break Out", "Blackheads", "Build Up", "Pustules", "Zits", "Full Acne", "Acne", "Cheek Rash", "Face Rash", "Picker", "Puberty", "Eyesore", "Chin Rash", "Two Face", "T Zone", "Greasy", "Marked", "Acne Scarring", "Full Acne Scarring", "Cold Sores", "Impetigo" } },
+				{ /*"Lipstick"*/"FACE_F_LIPST",{ "CC_LIPSTICK_0", "CC_LIPSTICK_1", "CC_LIPSTICK_2", "CC_LIPSTICK_3", "CC_LIPSTICK_4", "CC_LIPSTICK_5", "CC_LIPSTICK_6", "CC_LIPSTICK_7", "CC_LIPSTICK_8", "CC_LIPSTICK_9" } },
+				{ /*"Spots"*/"FACE_F_MOLE",{ "Cherub", "All Over", "Irregular", "Dot Dash", "Over the Bridge", "Baby Doll", "Pixie", "Sun Kissed", "Beauty Marks", "Line Up", "Modelesque", "Occasional", "Speckled", "Rain Drops", "Double Dip", "One Sided", "Pairs", "Growth" } },
+				{ "Chest Hair",{ "CC_BODY_1_0", "CC_BODY_1_1", "CC_BODY_1_2", "CC_BODY_1_3", "CC_BODY_1_4", "CC_BODY_1_5", "CC_BODY_1_6", "CC_BODY_1_7", "CC_BODY_1_8", "CC_BODY_1_9", "CC_BODY_1_10", "CC_BODY_1_11", "CC_BODY_1_12", "CC_BODY_1_13", "CC_BODY_1_14", "CC_BODY_1_15", "CC_BODY_1_16", "CC_BODY_1_17" } },
+				{ "Chest Blemishes",{} },
+				{ "Chest Blemishes 2",{} },
+			};
+
+			void ChangePedAppearance()
+			{
+				auto tskPtr = _selectedSTST->GetTypeTask<STSTasks::ChangePedAppearance>();
+				int max_colours = 64;
+
+				bool mainTypePlus = 0, mainTypeMinus = 0;
+				bool subTypeMakeupPlus= 0, subTypeMakeupMinus= 0;
+				bool subTypeClothingPlus= 0, subTypeClothingMinus= 0;
+
+				bool itemPlus= 0, itemMinus= 0;
+				bool texturePlus= 0, textureMinus= 0;
+				bool opacityPlus= 0, opacityMinus= 0;
+				bool color1Plus= 0, color1Minus= 0;
+				bool color2Plus= 0, color2Minus= 0;
+
+				AddTexter("Main Type", tskPtr->mainType, v_mainTypes, null, mainTypePlus, mainTypeMinus);
+				if (mainTypePlus)
+				{
+					if (tskPtr->mainType < v_mainTypes.size() - 1) tskPtr->mainType++;
+					else tskPtr->mainType = v_mainTypes.size() - 1;
+				}
+				if (mainTypeMinus)
+				{
+					if (tskPtr->mainType > 0) tskPtr->mainType--;
+					else tskPtr->mainType = 0;
+				}
+
+				// Here we select Item slot, because subType is not currently used, we only allow for Makeup (SubType 4)
+				AddTexter("Makeup type", tskPtr->item, vCaptions_headOverlays[4].second, null, subTypeMakeupPlus, subTypeMakeupMinus);
+				if (subTypeMakeupPlus)
+				{
+					if (tskPtr->item < vCaptions_headOverlays[4].second.size()) tskPtr->item++;
+					else tskPtr->item = vCaptions_headOverlays[4].second.size() - 1;
+				}
+				if (subTypeMakeupMinus)
+				{
+					if (tskPtr->item > 0) tskPtr->item--;
+					else tskPtr->item = 0;
+				}
+
+				AddTexter("Wardrobe type", tskPtr->subType, v_clothingSubTypes, null, subTypeClothingPlus, subTypeClothingMinus);
+				if (subTypeClothingPlus)
+				{
+					if (tskPtr->subType < v_clothingSubTypes.size()) tskPtr->subType++;
+					else tskPtr->subType = v_clothingSubTypes.size() - 1;
+				}
+				if (subTypeClothingMinus)
+				{
+					if (tskPtr->subType > 0) tskPtr->subType--;
+					else tskPtr->subType = 0;
+				}
+
+				AddNumber("Item", tskPtr->item, 0, null, itemPlus, itemMinus);
+				if (itemPlus) tskPtr->item++;
+				if (itemMinus)
+					if (tskPtr->item > 0) tskPtr->item--;
+					else tskPtr->item = 0;
+
+				AddNumber("Texture", tskPtr->texture, 0, null, texturePlus, textureMinus);
+				if (texturePlus) tskPtr->texture++;
+				if (textureMinus)
+					if (tskPtr->texture > 0) tskPtr->texture--;
+					else tskPtr->texture = 0;
+
+				AddNumber("Opacity", tskPtr->opacity, 0, null, opacityPlus, opacityMinus);
+				if (opacityPlus)
+					if (tskPtr->opacity < 1.0f) tskPtr->opacity += 0.1f;
+					else tskPtr->opacity = 1.0f;
+				if (opacityMinus)
+					if (tskPtr->opacity > 0) tskPtr->opacity -= 0.1f;
+					else tskPtr->opacity = 0;
+
+				AddNumber("Color1", tskPtr->color1, 0, null, color1Plus, color1Minus);
+				if (color1Plus)
+					if (tskPtr->color1 < max_colours) tskPtr->color1++;
+					else tskPtr->color1 = max_colours;
+				if (color1Minus)
+					if (tskPtr->color1 > 0) tskPtr->color1--;
+					else tskPtr->color1 = 0;
+
+				AddNumber("Color2", tskPtr->color2, 0, null, color2Plus, color2Minus);
+				if (color2Plus)
+					if (tskPtr->color2 < max_colours) tskPtr->color2++;
+					else tskPtr->color2 = max_colours;
+				if (color2Minus)
+					if (tskPtr->color2 > 0) tskPtr->color2--;
+					else tskPtr->color2 = 0;
+
+				/*
+				auto tskPtr = _selectedSTST->GetTypeTask<STSTasks::ChangePedAppearance>();
+				int max_colours = 64;
+
+				int subTypeMakeup = 0;
+				int subTypeClothing = 0;
+				int item = 0;
+				int texture = 0;
+				float opacity = 1.0f;
+				int color1 = 0;
+				int color2 = 0;
+
+				bool mainTypePlus = false, mainTypeMinus = false;
+				bool subTypeMakeupPlus = false, subTypeMakeupMinus = false;
+				bool subTypeClothingPlus = false, subTypeClothingMinus = false;
+
+				bool itemPlus = false, itemMinus = false;
+				bool texturePlus = false, textureMinus = false;
+				bool opacityPlus = false, opacityMinus = false;
+				bool color1Plus = false, color1Minus = false;
+				bool color2Plus = false, color2Minus = false;
+
+				AddTexter("Main Type", tskPtr->mainType, v_mainTypes, null, mainTypePlus, mainTypeMinus);
+				if (mainTypePlus)
+				{
+					if (tskPtr->mainType < v_mainTypes.size()) tskPtr->mainType++;
+					else tskPtr->mainType = v_mainTypes.size() - 1;
+				}
+				if (mainTypeMinus)
+				{
+					if (tskPtr->mainType >= 0) tskPtr->mainType--;
+					else tskPtr->mainType = 0;
+				}
+
+				if (mainTypePlus || mainTypeMinus)
+				{
+					switch (tskPtr->mainType)
+					{
+						case 0:
+						{
+							tskPtr->subType = 0;
+							tskPtr->item = 0;
+							tskPtr->texture = 0;
+							tskPtr->opacity = 0.0f;
+							tskPtr->color1 = color1;
+							tskPtr->color2 = color2;
+							break;
+						}
+						case 1:
+						{
+							tskPtr->subType = 0;
+							tskPtr->item = subTypeMakeup;
+							tskPtr->texture = 0;
+							tskPtr->opacity = opacity;
+							tskPtr->color1 = color1;
+							tskPtr->color2 = color2;
+							break;
+						}
+						case 2:
+						{
+							tskPtr->subType = subTypeClothing;
+							tskPtr->item = item;
+							tskPtr->texture = texture;
+							tskPtr->opacity = 0.0f;
+							tskPtr->color1 = 0;
+							tskPtr->color2 = 0;
+							break;
+						}
+					}
+				}
+
+				AddTexter("Makeup type", subTypeClothing, vCaptions_headOverlays[4].second, null, subTypeMakeupPlus, subTypeMakeupMinus);
+				if (subTypeMakeupPlus)
+				{
+					if (subTypeMakeup < vCaptions_headOverlays[4].second.size()) subTypeMakeup++;
+					else subTypeMakeup = vCaptions_headOverlays[4].second.size() - 1;
+				}
+				if (subTypeMakeupMinus)
+				{
+					if (subTypeMakeup >= 0) subTypeMakeup--;
+					else subTypeMakeup = 0;
+				}
+
+				AddTexter("Wardrobe type", subTypeClothing, v_clothingSubTypes, null, subTypeClothingPlus, subTypeClothingMinus);
+				if (subTypeClothingPlus)
+				{
+					if (subTypeClothing < v_clothingSubTypes.size()) subTypeClothing++;
+					else subTypeClothing = v_clothingSubTypes.size() - 1;
+				}
+				if (subTypeClothingMinus)
+				{
+					if (subTypeClothing >= 0) subTypeClothing--;
+					else subTypeClothing = 0;
+				}
+
+				
+				AddNumber("Item", item, 0, null, itemPlus, itemMinus);
+				if (itemPlus) item++;
+				if (itemMinus)
+					if (item > 0) item--;
+					else item = 0;
+
+				AddNumber("Texture", texture, 0, null, texturePlus, textureMinus);
+				if (texturePlus) texture++;
+				if (textureMinus)
+					if (item > 0) texture--;
+					else texture = 0;
+
+				AddNumber("Opacity", opacity, 0, null, opacityPlus, opacityMinus);
+				if (opacityPlus)
+					if (opacity < 1.0f) opacity += 0.1f;
+					else opacity = 1.0f;
+				if (opacityMinus)
+					if (opacity > 0) opacity -= 0.1f;
+					else opacity = 0;
+
+				AddNumber("Color1", color1, 0, null, color1Plus, color1Minus);
+				if (color1Plus)
+					if (color1 < max_colours) color1++;
+					else color1 = max_colours;
+				if (color1Minus)
+					if (color1 > 0) color1--;
+					else color1 = 0;
+
+				AddNumber("Color2", color2, 0, null, color2Plus, color2Minus);
+				if (color2Plus)
+					if (color2 < max_colours) color2++;
+					else color2 = max_colours;
+				if (color2Minus)
+					if (color2 > 0) color2--;
+					else color2 = 0;
+					*/
 			}
 		}
 

@@ -683,6 +683,26 @@ namespace sub::Spooner
 			void RunP(GTAped& ep) override;
 		};
 
+		class ChangePedAppearance final : public STSTask
+		{
+		private:
+			void GetXmlNodeTaskSpecific(pugi::xml_node& nodeTask) const override;
+			void ImportXmlNodeTaskSpecific(pugi::xml_node& nodeTask) override;
+			void ImportTaskDataSpecific(STSTask* otherTsk) override;
+		public:
+			int mainType;
+			int subType;
+
+			int item;
+			int texture;
+			float opacity;
+			int color1;
+			int color2;
+
+			ChangePedAppearance();
+			void RunP(GTAped& ep) override;
+		};
+
 	}
 
 }

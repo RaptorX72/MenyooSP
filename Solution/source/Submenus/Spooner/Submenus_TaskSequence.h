@@ -80,6 +80,8 @@ namespace sub::Spooner
 			void SetRotation();
 			void ChangeOpacity();
 			void TriggerFx();
+
+			void ChangePedAppearance();
 		}
 		void Sub_TaskSequence_TaskList();
 		void Sub_TaskSequence_AddTask();

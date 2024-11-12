@@ -126,6 +126,8 @@ namespace sub::Spooner
 		case STSTaskType::ChangeOpacity: tskPtr = (new STSTasks::ChangeOpacity); break;
 		case STSTaskType::TriggerFx: tskPtr = (new STSTasks::TriggerFx); break;
 
+		case STSTaskType::ChangePedAppearance: tskPtr = (new STSTasks::ChangePedAppearance); break;
+
 		case STSTaskType::SnapTasks: tskPtr = (new STSTasks::SnapTasks); break;
 		case STSTaskType::EndSequence: tskPtr = (new STSTasks::EndSequence); break;
 		}

@@ -25,6 +25,9 @@
 #include "enums.h"
 #include "..\Natives\natives2.h"
 
+#include "..\Scripting\GTAped.h"
+#include "..\Scripting\GTAentity.h"
+#include "../Submenus/PedComponentChanger.h"
 //#include <stdarg.h>
 
 Tasks::Tasks(GTAentity ped)
@@ -393,6 +396,51 @@ void Tasks::WarpIntoVehicle(GTAentity vehicle, VehicleSeat seat)
 void Tasks::WarpOutOfVehicle(GTAentity vehicle)
 {
 	TASK_LEAVE_VEHICLE(_ped.Handle(), vehicle.Handle(), 16);
+}
+
+void Tasks::ChangePedAppearance(int mainType, int subType, int item, int texture, float opacity, int color1, int color2)
+{
+	switch (mainType)
+	{
+		// Shape & Skin tone
+		case 0: {
+			PedHeadBlendData blendData;
+			GET_PED_HEAD_BLEND_DATA(_ped.Handle(), (Any*)&blendData);
+
+			blendData.skinFirstID = color1;
+			blendData.skinSecondID = color2;
+
+			SET_PED_HEAD_BLEND_DATA(
+				_ped.GetHandle(),
+				blendData.shapeFirstID,
+				blendData.shapeSecondID,
+				blendData.shapeThirdID,
+				blendData.skinFirstID,
+				blendData.skinSecondID,
+				blendData.skinThirdID,
+				blendData.shapeMix,
+				blendData.skinMix,
+				blendData.thirdMix,
+				blendData.isParent
+			);
+			break;
+		}
+
+		// Overlay
+		case 1: {
+			SET_PED_HEAD_OVERLAY(_ped.Handle(), 4, item, opacity);
+			SET_PED_HEAD_OVERLAY_TINT(_ped.Handle(), 4, sub::PedHeadFeatures_catind::GetPedHeadOverlayColourType((PedHeadOverlay)subType), color1, color2);
+			break;
+		}
+
+		// Clothing
+		case 2: {
+			SET_PED_COMPONENT_VARIATION(_ped.Handle(), subType, item, texture, GET_PED_PALETTE_VARIATION(_ped.Handle(), subType));
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 void Tasks::ClearAll()

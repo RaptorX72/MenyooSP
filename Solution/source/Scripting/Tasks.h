@@ -109,6 +109,8 @@ public:
 	void WarpIntoVehicle(GTAentity vehicle, VehicleSeat seat);
 	void WarpOutOfVehicle(GTAentity vehicle);
 
+	void ChangePedAppearance(int mainType, int subType, int item, int texture, float opacity, int color1, int color2);
+
 	void ClearAll();
 	void ClearAllImmediately();
 	void ClearLookAt();
